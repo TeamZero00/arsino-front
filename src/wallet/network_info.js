@@ -61,11 +61,6 @@ const chainInfo = (chainId, chainName, rpc, rest, coinDenom, coinMinimaldenom, c
     // 따로 지정하지 않을 경우 (low: 0.01, average: 0.025, high: 0.04)를 default로 설정
     // 아직까지 Keplr 는 온체인 데이터에 기반한 동적 계산을 지원하지 않음
     // RPC/REST 엔드포인트와 체인의 검증인들이 설정한 최소 gas 가격보다 높아야 한다.
-    gasPriceStep: {
-      low: 0.01,
-      average: 0.05,
-      high: 0.25,
-    },
   };
 };
 

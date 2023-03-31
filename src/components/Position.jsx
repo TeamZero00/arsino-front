@@ -3,19 +3,28 @@ import styled from "styled-components";
 const PositionTotal = styled.div`
   width: 100%;
   height: 200px;
-  background-color: #16182e;
+  background-color: #181818;
   overflow: auto;
+  border: 0.5px solid gray;
+  border-radius: 2px;
+  //스크롤바 없애기
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 const PositionTopInfo = styled.div`
-  background-color: gray;
   display: flex;
   padding: 10px;
   justify-content: space-between;
   position: sticky;
   top: 0;
+  color: #777777;
+  border-bottom: 0.5px solid gray;
+  background-color: #181818;
 `;
+
 const PositionTopInfoDiv = styled.div`
-  border: 3px solid orange;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -23,8 +32,6 @@ const PositionTopInfoDiv = styled.div`
 `;
 
 const PositionInfo = styled.div`
-  border: 3px solid orange;
-  color: white;
   margin: 10px;
   display: flex;
   justify-content: space-between;
@@ -32,9 +39,9 @@ const PositionInfo = styled.div`
   max-height: 160px; /* 아래 예시에서 40px 여백을 주기 위해 높이를 조정합니다 */
 `;
 const PositionInfoData = styled.div`
-  border: 3px solid orange;
-  color: white;
+  color: #999999;
   display: flex;
+
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -112,6 +119,7 @@ function Position() {
       {dummyData.map((data) => (
         <PositionInfo key={data.id}>
           <PositionInfoData>{data.Date}</PositionInfoData>
+
           <PositionInfoData>{data.Position}</PositionInfoData>
           <PositionInfoData>{data.Amount}</PositionInfoData>
           <PositionInfoData>{data.Winning}</PositionInfoData>

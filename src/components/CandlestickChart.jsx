@@ -2,11 +2,19 @@ import React, { useState, useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import moment from "moment";
 import axios from "axios";
+import styled from "styled-components";
+
+const ChartDiv = styled.div`
+  border: 1px solid gray;
+  border-radius: 2px;
+  height: 350px;
+  margin: 10px 0;
+`;
 
 const CandlestickChart = () => {
   const [options, setOptions] = useState({
     chart: {
-      background: "#16182e",
+      background: "#181818",
       type: "candlestick",
       height: 350,
       toolbar: false,
@@ -29,10 +37,10 @@ const CandlestickChart = () => {
       },
     },
     title: {
-      text: "BTCUSDT Candlestick Chart",
+      text: "BTC Price",
       align: "left",
       style: {
-        color: "#ffffff",
+        color: "#777777",
       },
     },
     xaxis: {
@@ -51,7 +59,7 @@ const CandlestickChart = () => {
       },
       labels: {
         style: {
-          colors: "#ffffff",
+          colors: "#777777",
         },
         formatter: (value) => {
           return moment(value).format("HH:mm");
@@ -63,7 +71,7 @@ const CandlestickChart = () => {
       opposite: true,
       labels: {
         style: {
-          colors: "#ffffff",
+          colors: "#777777",
         },
       },
     },
@@ -80,7 +88,9 @@ const CandlestickChart = () => {
     let isMounted = true;
 
     const fetchChartData = async () => {
-      const response = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${interval}&limit=30`);
+      const response = await axios.get(
+        `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${interval}&limit=30`
+      );
       const klines = response.data;
       const data = klines.map((kline) => {
         const timestamp = kline[0];
@@ -167,20 +177,22 @@ const CandlestickChart = () => {
   };
 
   return (
-    <ReactApexChart
-      options={{
-        ...options,
-        tooltip: {
-          enabled: true,
-          shared: true,
-          intersect: false,
-          custom: handleTooltip,
-        },
-      }}
-      series={series}
-      type="candlestick"
-      height={350}
-    />
+    <ChartDiv>
+      <ReactApexChart
+        options={{
+          ...options,
+          tooltip: {
+            enabled: true,
+            shared: true,
+            intersect: false,
+            custom: handleTooltip,
+          },
+        }}
+        series={series}
+        type="candlestick"
+        height={350}
+      />
+    </ChartDiv>
   );
 };
 

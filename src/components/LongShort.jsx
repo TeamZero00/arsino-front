@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
+import connectWallet from "../wallet/connect";
+import networkInfo from "../wallet/network_info";
+import BalanceContext from "./BalanceContext";
 
 const RightTotalInfo = styled.div`
-  border: 3px solid gray;
-  margin: 10px;
-  height: 600px;
+  border: 0.5px solid gray;
+  border-radius: 3px;
+  margin: 10px 0 0 10px;
+  height: 605px;
   padding: 10px;
   width: 30%;
-  background-color: #16182e;
+  background-color: black;
 `;
 const BtnTotal = styled.div`
-  border: 3px solid orange;
+  border: 1px solid gray;
   display: flex;
   flex: 1 1;
+
   margin-bottom: 15px;
 `;
 
@@ -21,9 +26,15 @@ const LongButton = styled.button`
   border: none;
   width: 100%;
   padding: 8px;
-  background-color: gray;
+  color: #777777;
+  background-color: #181818;
+  &.active {
+    background-color: #ff4d00;
+    color: white;
+  }
   &:hover {
-    background-color: blue;
+    background-color: #f76a2d;
+    color: white;
   }
 `;
 const ShortButton = styled.button`
@@ -31,16 +42,18 @@ const ShortButton = styled.button`
   border: none;
   width: 100%;
   padding: 8px;
-  background-color: gray;
+  color: #777777;
+  background-color: #181818;
   &:hover {
-    background-color: blue;
+    background-color: #f76a2d !important;
+    color: white !important;
   }
 `;
 
 const InputDiv = styled.div`
-  border: 3px solid orange;
+  border: 0.5px solid gray;
   margin-bottom: 15px;
-  background-color: gray;
+  background-color: #181818;
 `;
 const InputPayBalnace = styled.div`
   display: flex;
@@ -53,7 +66,7 @@ const InputAmount = styled.input`
   width: 85%;
   height: 30px;
   font-size: 20px;
-  background-color: gray;
+  background-color: #181818;
   border: none;
   color: white;
   margin-bottom: 10px;
@@ -67,38 +80,77 @@ const InputAmount = styled.input`
 //
 //아웃풋 박스
 const OutputDiv = styled.div`
-  border: 3px solid orange;
-  background-color: gray;
+  border: 0.5px solid gray;
+  background-color: #181818;
 `;
 const OutputAmount = styled.div`
-  color: white;
+  color: #e4e9f0;
   font-size: 20px;
   margin: 10px;
 `;
 
 function LongShort() {
+  const { balance } = useContext(BalanceContext);
   const [inputValue, setInPutValue] = useState();
+  const [clickValue, setClickValue] = useState("Long");
+  const [isShortClick, setIsShortClick] = useState(false);
+  const [isLongClick, setIsLongClick] = useState(true);
+
+  //balance
+  console.log(balance);
+  const handleLongClick = () => {
+    setIsShortClick(false);
+    setIsLongClick(true);
+  };
+  const handleShortClick = () => {
+    setIsShortClick(true);
+    setIsLongClick(false);
+  };
+  const handleClickValue = (e) => {
+    setClickValue(e.target.value);
+  };
   const handleInputchange = (e) => {
     setInPutValue(e.target.value);
   };
-
   return (
     <RightTotalInfo>
       <BtnTotal>
-        <LongButton> Long </LongButton>
-        <ShortButton> Short </ShortButton>
+        <LongButton
+          className={isLongClick ? "active" : ""}
+          onClick={(e) => {
+            setClickValue("Long");
+            handleLongClick();
+          }}
+        >
+          Long
+        </LongButton>
+        <ShortButton
+          onClick={(e) => {
+            setClickValue("Short");
+            handleShortClick();
+          }}
+          style={{
+            backgroundColor: isShortClick ? "#ff4d00" : "#181818",
+            color: isShortClick ? "white" : "#777777",
+          }}
+        >
+          {" "}
+          Short{" "}
+        </ShortButton>
       </BtnTotal>
       <InputDiv>
         <InputPayBalnace>
           {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} arch</div> : <div>Pay: 0.00 arch</div>}
 
-          <div>Balance: 0.0000</div>
+          <div>
+            Balance: {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(4) : "Loading..."}
+          </div>
         </InputPayBalnace>
         <InputAmount type="number" placeholder="0.0" value={inputValue} onChange={handleInputchange} />
       </InputDiv>
       <OutputDiv>
         <InputPayBalnace>
-          <div>Long</div>
+          <div>{clickValue}</div>
           <div>Leverage 2x</div>
         </InputPayBalnace>
         <OutputAmount>
