@@ -68,8 +68,8 @@ const networkInfo = {
   "constantine-1": chainInfo(
     "constantine-1",
     "Archway Testnet",
-    "https://rpc.constantine-1.archway.tech:443",
-    "https://api.constantine-1.archway.tech",
+    "https://rpc.constantine-2.archway.tech:443",
+    "https://api.constantine-2.archway.tech",
     "CONST",
     "uconst",
     6,

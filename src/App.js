@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import BalanceContext from "./components/BalanceContext";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import connectWallet from "./wallet/connect";
+import SmartContractButton from "./components/ArchwayQuery";
 
 function App({ getInfo }) {
   const [balance, setBalance] = useState(null);
@@ -16,6 +17,7 @@ function App({ getInfo }) {
         <Header />
         <InfoChart />
         <h1>{balance && balance.amount}</h1>
+
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <div></div>

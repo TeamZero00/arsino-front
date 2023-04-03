@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
+import SmartContractButton from "./ArchwayQuery";
 import BalanceContext from "./BalanceContext";
 
 const RightTotalInfo = styled.div`
@@ -162,6 +163,7 @@ function LongShort() {
           )}
         </OutputAmount>
       </OutputDiv>
+      <SmartContractButton />
     </RightTotalInfo>
   );
 }
