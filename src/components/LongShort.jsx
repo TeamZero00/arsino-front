@@ -1,3 +1,4 @@
+import { ArchwayClient } from "@archwayhq/arch3.js/build";
 import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import connectWallet from "../wallet/connect";
@@ -96,8 +97,8 @@ function LongShort() {
   const [isShortClick, setIsShortClick] = useState(false);
   const [isLongClick, setIsLongClick] = useState(true);
 
-  //balance
-  console.log(balance);
+  //arch3.js
+
   const handleLongClick = () => {
     setIsShortClick(false);
     setIsLongClick(true);

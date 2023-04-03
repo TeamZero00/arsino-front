@@ -28,12 +28,15 @@ const CandlestickChart = () => {
       },
       tooltip: {
         enabled: true,
+        style: {
+          colors: "#000000",
+        },
       },
     },
     noData: {
       text: "Loading...",
       style: {
-        color: "#ffffff",
+        color: "#777777",
       },
     },
     title: {
@@ -51,7 +54,7 @@ const CandlestickChart = () => {
           fontSize: "12px",
           fontFamily: "Helvetica, Arial, sans-serif",
           fontWeight: 400,
-          colors: ["#ffffff"],
+          colors: ["#777777"],
         },
         formatter: (value) => {
           return moment(value).format("HH:mm");
@@ -106,7 +109,6 @@ const CandlestickChart = () => {
 
     const connectWebSocket = () => {
       ws = new WebSocket(websocketUrl);
-      ws.onopen = () => console.log(`Connected to ${websocketUrl}`);
       ws.onmessage = (event) => {
         const kline = JSON.parse(event.data).k;
         const timestamp = kline.t;
@@ -142,7 +144,6 @@ const CandlestickChart = () => {
       };
 
       ws.onclose = (event) => {
-        console.log("WebSocket connection closed.");
         // 웹소켓 연결 종료 시 재접속 시도
         if (isMounted) {
           setTimeout(() => {

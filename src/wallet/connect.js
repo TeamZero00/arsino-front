@@ -28,7 +28,6 @@ const connectWallet = async (evnet, chainInfo, { getInfo, setBalance }) => {
   const balance = await client.getBalance(accounts[0].address, chainInfo.stakeCurrency.coinMinimalDenom);
   // 부모 컴포넌트로 값을 넘겨주기 위한 함수
   getInfo(client, accounts[0].address, balance, chainInfo.chainId);
-  setBalance(balance);
 };
 
 export default connectWallet;
