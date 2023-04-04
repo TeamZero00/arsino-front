@@ -92,7 +92,7 @@ const CandlestickChart = () => {
 
     const fetchChartData = async () => {
       const response = await axios.get(
-        `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${interval}&limit=30`
+        `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${interval}&limit=180`
       );
       const klines = response.data;
       const data = klines.map((kline) => {
@@ -137,6 +137,9 @@ const CandlestickChart = () => {
                 data.shift();
               }
             }
+            const currentTime = Date.now();
+            const sixHoursAgo = currentTime - 3 * 60 * 60 * 1000;
+            data = data.filter((candlestick) => candlestick.x >= sixHoursAgo);
 
             return [{ data }];
           });

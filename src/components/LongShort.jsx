@@ -145,7 +145,7 @@ function LongShort() {
           {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} arch</div> : <div>Pay: 0.00 arch</div>}
 
           <div>
-            Balance: {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(4) : "Loading..."}
+            Balance: {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(6) : "Loading..."}
           </div>
         </InputPayBalnace>
         <InputAmount type="number" placeholder="0.0" value={inputValue} onChange={handleInputchange} />
