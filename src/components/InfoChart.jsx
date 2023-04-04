@@ -22,7 +22,7 @@ const WidthInnerData = styled.div`
 `;
 const ChartDiv = styled.div`
   display: flex;
-  border: solid 3px orange;
+
   width: 600px;
 
   justify-content: left;
