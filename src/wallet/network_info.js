@@ -65,8 +65,8 @@ const chainInfo = (chainId, chainName, rpc, rest, coinDenom, coinMinimaldenom, c
 };
 
 const networkInfo = {
-  "constantine-1": chainInfo(
-    "constantine-1",
+  "constantine-2": chainInfo(
+    "constantine-2",
     "Archway Testnet",
     "https://rpc.constantine-2.archway.tech:443",
     "https://api.constantine-2.archway.tech",

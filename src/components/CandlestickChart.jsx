@@ -7,8 +7,9 @@ import styled from "styled-components";
 const ChartDiv = styled.div`
   border: 1px solid gray;
   border-radius: 2px;
-  height: 350px;
+  height: ${({ height }) => height + 2}px;
   margin: 10px 0;
+  box-sizing: border-box;
 `;
 
 const CandlestickChart = () => {
@@ -16,7 +17,7 @@ const CandlestickChart = () => {
     chart: {
       background: "#181818",
       type: "candlestick",
-      height: 350,
+
       toolbar: false,
       animations: {
         enabled: false,
@@ -79,7 +80,17 @@ const CandlestickChart = () => {
       },
     },
   });
+  const [chartHeight, setChartHeight] = useState(window.innerHeight * 0.45);
+  const updateChartHeight = () => {
+    setChartHeight(window.innerHeight * 0.45);
+  };
+  useEffect(() => {
+    window.addEventListener("resize", updateChartHeight);
 
+    return () => {
+      window.removeEventListener("resize", updateChartHeight);
+    };
+  }, []);
   const [series, setSeries] = useState([{ data: [] }]);
 
   useEffect(() => {
@@ -181,7 +192,7 @@ const CandlestickChart = () => {
   };
 
   return (
-    <ChartDiv>
+    <ChartDiv height={chartHeight}>
       <ReactApexChart
         options={{
           ...options,
@@ -194,7 +205,7 @@ const CandlestickChart = () => {
         }}
         series={series}
         type="candlestick"
-        height={350}
+        height={chartHeight}
       />
     </ChartDiv>
   );

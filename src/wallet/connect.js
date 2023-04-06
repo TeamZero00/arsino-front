@@ -2,6 +2,7 @@ import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 const connectWallet = async (evnet, chainInfo, { getInfo, setBalance }) => {
   // 사용자의 브라우저에 Keplr extension이 설치되었는지 확인
+
   if (!window.getOfflineSigner || !window.keplr) {
     alert("Please install Keplr Extension");
   }
@@ -26,8 +27,9 @@ const connectWallet = async (evnet, chainInfo, { getInfo, setBalance }) => {
   const client = await SigningCosmWasmClient.connectWithSigner(chainInfo.rpc, offlineSigner);
   // 해당 주소의 balance 가져오기
   const balance = await client.getBalance(accounts[0].address, chainInfo.stakeCurrency.coinMinimalDenom);
+  const walletName = await window.keplr.getKey(chainInfo.chainId);
   // 부모 컴포넌트로 값을 넘겨주기 위한 함수
-  getInfo(client, accounts[0].address, balance, chainInfo.chainId);
+  getInfo(client, accounts[0].address, balance, chainInfo.chainId, walletName);
 
   // console.log(offlineSigner);
   // console.log(balance);

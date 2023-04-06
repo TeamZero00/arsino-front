@@ -3,6 +3,7 @@ import styled from "styled-components";
 import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
 import BalanceContext from "./BalanceContext";
+import { FiExternalLink, FiCopy } from "react-icons/fi";
 
 const HeaderDiv = styled.div`
   border-bottom: solid 1px gray;
@@ -10,6 +11,14 @@ const HeaderDiv = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 10px 50px;
+`;
+const LogoName = styled.div`
+  font-size: 30px;
+  font-weight: 700;
+  color: white;
+  margin-left: 15px;
+  display: flex;
+  align-items: center;
 `;
 
 const LeftHeaderNavi = styled.div`
@@ -20,13 +29,126 @@ const RightHeaderNavi = styled.div`
   align-items: center;
 `;
 const RightWalletConnect = styled.button`
-  background-color: #16182e;
+  background-color: #f76a2d;
+  border: none;
+  padding: 5px 10px;
+  font-weight: 700;
   font-size: 20px;
   color: #e4e9f0;
+  border-radius: 5px;
+  &:hover {
+    background-color: #ff4d00;
+    cursor: pointer;
+  }
+`;
+const RightConnectedWallet = styled.button`
+  background-color: #181818;
+  border: none;
+  padding: 5px 10px;
+  font-weight: 700;
+  font-size: 20px;
+  color: #e4e9f0;
+  border-radius: 5px;
+  &:hover {
+    background-color: #2a2a2a;
+    color: #ff4d00;
+    cursor: pointer;
+  }
 `;
 
 const ArsinoImg = styled.img`
+  width: 50px;
+`;
+
+const DownBtnDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex: 1 1;
+`;
+const CloseButton = styled.button`
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+  width: 45%;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px 0;
+  background-color: #ff4d00;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const ModalWrapper = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
+  background-color: #2d2d2dab;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5000;
+`;
+const ModalTopContentDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 28px;
+  font-weight: 650;
+  color: #e4e9f0;
+  background-color: black;
+`;
+const ModalTopContent = styled.button`
+  padding: 20px 0;
+  background-color: black;
+  border: none;
+  justify-content: right;
+  align-items: center;
+  border-radius: 5px;
+  color: #e4e9f0;
+  font-size: 25px;
+  font-weight: 650;
+  &:hover {
+    color: #ff4d00;
+    cursor: pointer;
+  }
+`;
+const ModalContent = styled.div`
+  justify-content: space-between;
+  background-color: black;
+
+  padding: 10px 30px;
+  border-radius: 10px;
+`;
+const ModalMainDiv = styled.div`
+  color: #a3a3a3;
+  background-color: black;
+
+  justify-content: left;
+  align-items: center;
+`;
+const ModalMainInnerDiv = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #777777;
+  font-size: 13px;
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  button {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    margin-left: 10px;
+    background-color: #777777;
+    border: none;
+    cursor: pointer;
+  }
 `;
 
 function Header() {
@@ -35,14 +157,60 @@ function Header() {
   const [client, setClient] = useState();
   const [address, setAddress] = useState();
   const [chainId, setChainId] = useState();
+  const [walletName, setWalletName] = useState();
   const [isVisible, setVisible] = useState(false);
 
   // connectWallet 으로 전달할 함수
-  const getInfo = (client, address, returnedBalance, chainId) => {
+  const getInfo = (client, address, returnedBalance, chainId, walletName) => {
     setClient(client);
     setAddress(address);
     setBalance(returnedBalance);
     setChainId(chainId);
+    setWalletName(walletName);
+  };
+
+  const Modal = ({ onClick }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const toggleModal = () => {
+      setIsOpen(!isOpen);
+    };
+
+    return (
+      <>
+        {isOpen && (
+          <ModalWrapper>
+            <ModalContent>
+              <ModalTopContentDiv>
+                {" "}
+                Accounts
+                <ModalTopContent onClick={toggleModal}>X</ModalTopContent>
+              </ModalTopContentDiv>
+
+              <ModalMainDiv>
+                <h3>Wallet Address</h3>
+                <ModalMainInnerDiv>
+                  {address}
+                  <button>
+                    <FiCopy />
+                  </button>
+                </ModalMainInnerDiv>
+              </ModalMainDiv>
+              <DownBtnDiv>
+                <CloseButton
+                  onClick={() => window.open(`https://testnet.mintscan.io/archway-testnet/account/${address}`)}
+                >
+                  Explorer <FiExternalLink />
+                </CloseButton>
+                <CloseButton onClick={disconnect}>Disconnect</CloseButton>
+              </DownBtnDiv>
+            </ModalContent>
+          </ModalWrapper>
+        )}
+        <RightConnectedWallet type="button" onClick={toggleModal}>
+          {walletName.name}
+        </RightConnectedWallet>
+      </>
+    );
   };
 
   // connectWallet으로 가져온 정보를 초기화
@@ -62,9 +230,7 @@ function Header() {
         return (
           // <RightWalletConnect type="button" onClick={(event) => disconnect(event)}>
 
-          <RightWalletConnect type="button" onClick={disBtnClick}>
-            {address.slice(0, 4) + "...." + address.slice(-6)}
-          </RightWalletConnect>
+          <Modal />
         );
       }
       return (
@@ -81,7 +247,8 @@ function Header() {
   return (
     <HeaderDiv>
       <LeftHeaderNavi>
-        <ArsinoImg alt="brandMark" src="src/arsinoMark.png" />
+        <ArsinoImg alt="brandMark" src="src/ArchwayBrandmark.svg" />
+        <LogoName>Arsino</LogoName>
       </LeftHeaderNavi>
       <RightHeaderNavi>
         <div>{renderBtn()}</div>
@@ -89,4 +256,5 @@ function Header() {
     </HeaderDiv>
   );
 }
+
 export default Header;

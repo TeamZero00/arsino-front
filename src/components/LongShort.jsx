@@ -10,7 +10,7 @@ const RightTotalInfo = styled.div`
   border: 0.5px solid gray;
   border-radius: 3px;
   margin: 10px 0 0 10px;
-  height: 605px;
+  height: (rightHeight);
   padding: 10px;
   width: 30%;
   background-color: black;
@@ -97,6 +97,10 @@ function LongShort() {
   const [clickValue, setClickValue] = useState("Long");
   const [isShortClick, setIsShortClick] = useState(false);
   const [isLongClick, setIsLongClick] = useState(true);
+  const [rightHeight, setRightHeight] = useState(window.innerHeight * 0.5);
+  const updateRightHeight = () => {
+    setRightHeight(window.innerHeight * 0.5);
+  };
 
   //arch3.js
 
@@ -114,6 +118,15 @@ function LongShort() {
   const handleInputchange = (e) => {
     setInPutValue(e.target.value);
   };
+
+  useEffect(() => {
+    window.addEventListener("resize", updateRightHeight);
+
+    return () => {
+      window.removeEventListener("resize", updateRightHeight);
+    };
+  }, []);
+
   return (
     <RightTotalInfo>
       <BtnTotal>

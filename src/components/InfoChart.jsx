@@ -54,8 +54,6 @@ const DataTitle = styled.div`
   font-size: 12px;
 `;
 
-const tickerClient = new W3CWebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker");
-
 function InfoChart() {
   const [coinInfo, setCoinInfo] = useState({
     current: null,
@@ -67,6 +65,7 @@ function InfoChart() {
   const [changePrice, setChangePrice] = useState(null);
 
   useEffect(() => {
+    const tickerClient = new W3CWebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker");
     //클라인 클라이언트
     tickerClient.onopen = () => {
       console.log("WebSocket Client Connected");
