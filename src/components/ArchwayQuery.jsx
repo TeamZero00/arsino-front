@@ -94,10 +94,6 @@ const SmartContractButton = () => {
       <ExecuteBtnDiv>
         <ExecuteButton onClick={ExecuteClick}>Execute Smart Contract</ExecuteButton>
       </ExecuteBtnDiv>
-      <div>
-        <button onClick={handleClick}>Query Smart Contract</button>
-        <div>Count: {count}</div>
-      </div>
     </div>
   );
 };
