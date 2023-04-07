@@ -7,6 +7,9 @@ import BalanceContext from "./components/BalanceContext";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import connectWallet from "./wallet/connect";
 import SmartContractButton from "./components/ArchwayQuery";
+import LandingPage from "./components/LandingPage";
+import { Route, Routes } from "react-router-dom";
+import Total from "./Total";
 
 function App({ getInfo }) {
   const [balance, setBalance] = useState(null);
@@ -14,8 +17,13 @@ function App({ getInfo }) {
   return (
     <BalanceContext.Provider value={{ balance, setBalance }}>
       <div className="App">
+        {/* <LandingPage />
         <Header />
-        <InfoChart />
+        <InfoChart /> */}
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/trade" element={<Total />} />
+        </Routes>
       </div>
     </BalanceContext.Provider>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { FaGithub, FaTelegramPlane, FaTwitter } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const LandingWrapperDiv = styled.div`
   display: flex;
@@ -104,7 +105,9 @@ function LandingPage() {
           </GttBtnDiv>
         </GttBtn>
         <DescMainBtn>
-          <button>Launch App</button>
+          <Link to="/trade">
+            <button>Launch App</button>
+          </Link>
         </DescMainBtn>
       </LandingHeaderDiv>
     </LandingWrapperDiv>

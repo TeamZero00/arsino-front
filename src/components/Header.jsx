@@ -57,7 +57,8 @@ const RightConnectedWallet = styled.button`
 `;
 
 const ArsinoImg = styled.img`
-  width: 50px;
+  height: 50px;
+  padding: 20px;
 `;
 
 const DownBtnDiv = styled.div`
@@ -247,8 +248,7 @@ function Header() {
   return (
     <HeaderDiv>
       <LeftHeaderNavi>
-        <ArsinoImg alt="brandMark" src="src/ArchwayBrandmark.svg" />
-        <LogoName>Arsino</LogoName>
+        <ArsinoImg alt="brandMark" src="src/HeaderBrandMark.svg" />
       </LeftHeaderNavi>
       <RightHeaderNavi>
         <div>{renderBtn()}</div>
