@@ -34,7 +34,7 @@ const TopChartInfo = styled.div`
   background-color: #181818;
   margin: 10px 0px;
 
-  border: 0.5px solid gray;
+  border: 0.5px solid #2e2e2e;
   border-radius: 3px;
 `;
 const InnerTopChartInfo = styled.div`

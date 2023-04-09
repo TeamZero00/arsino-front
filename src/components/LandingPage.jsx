@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import styled, { keyframes } from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import { FaGithub, FaTelegramPlane, FaTwitter } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -39,11 +39,25 @@ const LandingHeaderName = styled.img`
   height: 30px;
   margin-bottom: 100px;
 `;
+const blinkTyping = keyframes`
+    50% {
+    opacity: 0;
+  }
+`;
+
+const LandingTextDiv = styled.div`
+  font-size: 18px;
+  font-weight: 500;
+  color: #cecece;
+  padding-top: 50px;
+`;
+
 const LandingHeaderNameInfo = styled.img`
   flex: display;
   height: 200px;
   width: 100%;
 `;
+
 const DescMainBtn = styled.div`
   display: flex;
   justify-content: center;
@@ -69,7 +83,7 @@ const DescMainBtn = styled.div`
 `;
 const GttBtn = styled.div`
   display: flex;
-  padding-top: 100px;
+  padding-top: 70px;
 `;
 const GttBtnDiv = styled.div`
   font-size: 35px;
@@ -80,6 +94,24 @@ const GttBtnDiv = styled.div`
 `;
 
 function LandingPage() {
+  const descText = "Experience ZERO Margin Forex Trading for Individual Involvement";
+  const [landingText, setLandingText] = useState("");
+  const [textCount, setTextCount] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (textCount >= descText.length) {
+        clearInterval(interval);
+        return;
+      }
+
+      setLandingText((prev) => prev + descText.charAt(textCount));
+      setTextCount((prev) => prev + 1);
+    }, 50); // 글자 간격을 100ms로 조정하였습니다.
+
+    return () => clearInterval(interval);
+  }, [textCount, descText]);
+
   const [bgIndex, setBgIndex] = useState(1);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -93,6 +125,7 @@ function LandingPage() {
       <LandingImg className={bgIndex === 1 ? "bg1" : ""} alt="red" src="/src/LandingWrapper.svg" />
       <LandingHeaderDiv>
         <LandingHeaderNameInfo alt="brandnameinfo" src="/src/LandingMainNameInfo.svg" />
+        <LandingTextDiv>{landingText}</LandingTextDiv>
         <GttBtn>
           <GttBtnDiv>
             <FaGithub onClick={() => window.open("https://github.com/TeamZero00", "_blank")} />

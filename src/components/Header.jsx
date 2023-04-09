@@ -4,6 +4,7 @@ import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
 import BalanceContext from "./BalanceContext";
 import { FiExternalLink, FiCopy } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const HeaderDiv = styled.div`
   border-bottom: solid 1px gray;
@@ -31,9 +32,9 @@ const RightHeaderNavi = styled.div`
 const RightWalletConnect = styled.button`
   background-color: #f76a2d;
   border: none;
-  padding: 5px 10px;
+  padding: 10px 25px;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 15px;
   color: #e4e9f0;
   border-radius: 5px;
   &:hover {
@@ -46,7 +47,7 @@ const RightConnectedWallet = styled.button`
   border: none;
   padding: 5px 10px;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 18px;
   color: #e4e9f0;
   border-radius: 5px;
   &:hover {
@@ -56,9 +57,14 @@ const RightConnectedWallet = styled.button`
   }
 `;
 
+const TradeLinkBtn = styled.div`
+  background-color: green;
+  font-size: 18px;
+`;
+
 const ArsinoImg = styled.img`
-  height: 50px;
-  padding: 20px;
+  height: 40px;
+  padding: 10px;
 `;
 
 const DownBtnDiv = styled.div`
@@ -250,7 +256,16 @@ function Header() {
       <LeftHeaderNavi>
         <ArsinoImg alt="brandMark" src="src/HeaderBrandMark.svg" />
       </LeftHeaderNavi>
+      <div>
+        <Link to={"/swap"}>Swap Page</Link>
+      </div>
       <RightHeaderNavi>
+        <div>
+          <Link to={"/trade"} style={{ textDecoration: "none" }}>
+            Trade
+          </Link>
+        </div>
+
         <div>{renderBtn()}</div>
       </RightHeaderNavi>
     </HeaderDiv>

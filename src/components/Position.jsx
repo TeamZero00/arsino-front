@@ -5,7 +5,7 @@ const PositionTotal = styled.div`
   height: 200px;
   background-color: #181818;
   overflow: auto;
-  border: 0.5px solid gray;
+  border: 0.5px solid #2e2e2e;
   border-radius: 2px;
   //스크롤바 없애기
   scrollbar-width: none;
@@ -20,7 +20,7 @@ const PositionTopInfo = styled.div`
   position: sticky;
   top: 0;
   color: #777777;
-  border-bottom: 0.5px solid gray;
+  border-bottom: 0.5px solid #2e2e2e;
   background-color: #181818;
 `;
 
@@ -28,6 +28,7 @@ const PositionTopInfoDiv = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  font-weight: 500;
   width: 100%;
 `;
 

@@ -9,20 +9,23 @@ import { useContext } from "react";
 dotenv.config();
 
 const ExecuteBtnDiv = styled.div`
-  border: 3px solid orange;
   display: flex;
   justify-content: center;
   margin: 40px 0;
 `;
 
 const ExecuteButton = styled.button`
-  width: 80%;
-  height: 100px;
+  width: 100%;
+  height: 70px;
+  border: none;
   font-size: 20px;
+  font-weight: 600;
+  border-radius: 10px;
   color: white;
   background-color: #f76a2d;
   &:hover {
     background-color: #ff4d00;
+    cursor: pointer;
   }
 `;
 

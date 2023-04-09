@@ -5,7 +5,7 @@ import axios from "axios";
 import styled from "styled-components";
 
 const ChartDiv = styled.div`
-  border: 1px solid gray;
+  border: 1px solid #2e2e2e;
   border-radius: 2px;
   height: ${({ height }) => height + 2}px;
   margin: 10px 0;

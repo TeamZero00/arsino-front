@@ -10,6 +10,7 @@ import SmartContractButton from "./components/ArchwayQuery";
 import LandingPage from "./components/LandingPage";
 import { Route, Routes } from "react-router-dom";
 import Total from "./Total";
+import Swap from "./components/Page/Swap";
 
 function App({ getInfo }) {
   const [balance, setBalance] = useState(null);
@@ -23,6 +24,7 @@ function App({ getInfo }) {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/trade" element={<Total />} />
+          <Route path="/swap" element={<Swap />} />
         </Routes>
       </div>
     </BalanceContext.Provider>

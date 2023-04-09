@@ -7,7 +7,7 @@ import SmartContractButton from "./ArchwayQuery";
 import BalanceContext from "./BalanceContext";
 
 const RightTotalInfo = styled.div`
-  border: 0.5px solid gray;
+  border: 0.5px solid #2e2e2e;
   border-radius: 3px;
   margin: 10px 0 0 10px;
   height: (rightHeight);
@@ -16,7 +16,7 @@ const RightTotalInfo = styled.div`
   background-color: black;
 `;
 const BtnTotal = styled.div`
-  border: 1px solid gray;
+  border: 1px solid #2e2e2e;
   display: flex;
   flex: 1 1;
 
@@ -37,6 +37,7 @@ const LongButton = styled.button`
   &:hover {
     background-color: #f76a2d;
     color: white;
+    cursor: pointer;
   }
 `;
 const ShortButton = styled.button`
@@ -47,13 +48,14 @@ const ShortButton = styled.button`
   color: #777777;
   background-color: #181818;
   &:hover {
+    cursor: pointer;
     background-color: #f76a2d !important;
     color: white !important;
   }
 `;
 
 const InputDiv = styled.div`
-  border: 0.5px solid gray;
+  border: 0.5px solid #2e2e2e;
   margin-bottom: 15px;
   background-color: #181818;
 `;
@@ -82,7 +84,7 @@ const InputAmount = styled.input`
 //
 //아웃풋 박스
 const OutputDiv = styled.div`
-  border: 0.5px solid gray;
+  border: 0.5px solid #2e2e2e;
   background-color: #181818;
 `;
 const OutputAmount = styled.div`
@@ -157,9 +159,7 @@ function LongShort() {
         <InputPayBalnace>
           {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} arch</div> : <div>Pay: 0.00 arch</div>}
 
-          <div>
-            Balance: {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(6) : "Loading..."}
-          </div>
+          <div>Balance: {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(6) : "0.000000"}</div>
         </InputPayBalnace>
         <InputAmount type="number" placeholder="0.0" value={inputValue} onChange={handleInputchange} />
       </InputDiv>
