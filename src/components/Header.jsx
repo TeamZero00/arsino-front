@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import styled from "styled-components";
 import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
@@ -174,7 +174,28 @@ function Header() {
     setBalance(returnedBalance);
     setChainId(chainId);
     setWalletName(walletName);
+
+    sessionStorage.setItem("client", JSON.stringify(client));
+    sessionStorage.setItem("address", address);
+    sessionStorage.setItem("balance", JSON.stringify(returnedBalance));
+    sessionStorage.setItem("chainId", chainId);
+    sessionStorage.setItem("walletName", JSON.stringify(walletName));
   };
+  useEffect(() => {
+    const savedClient = JSON.parse(sessionStorage.getItem("client"));
+    const savedAddress = sessionStorage.getItem("address");
+    const savedBalance = JSON.parse(sessionStorage.getItem("balance"));
+    const savedChainId = sessionStorage.getItem("chainId");
+    const savedWalletName = JSON.parse(sessionStorage.getItem("walletName"));
+
+    if (savedClient && savedAddress && savedBalance && savedChainId && savedWalletName) {
+      setClient(savedClient);
+      setAddress(savedAddress);
+      setBalance(savedBalance);
+      setChainId(savedChainId);
+      setWalletName(savedWalletName);
+    }
+  }, []);
 
   const Modal = ({ onClick }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -226,6 +247,11 @@ function Header() {
     setChainId();
     setAddress();
     setBalance();
+    sessionStorage.removeItem("client");
+    sessionStorage.removeItem("address");
+    sessionStorage.removeItem("balance");
+    sessionStorage.removeItem("chainId");
+    sessionStorage.removeItem("walletName");
   };
   const disBtnClick = () => {
     setVisible(!isVisible);

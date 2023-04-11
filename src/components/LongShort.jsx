@@ -1,4 +1,5 @@
-import { ArchwayClient } from "@archwayhq/arch3.js/build";
+import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
+import { GasPrice } from "@cosmjs/stargate";
 import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import connectWallet from "../wallet/connect";
@@ -94,21 +95,44 @@ const OutputAmount = styled.div`
 `;
 
 function LongShort() {
-  const { balance } = useContext(BalanceContext);
-  const [inputValue, setInPutValue] = useState();
+  const { balance, setBalance } = useContext(BalanceContext);
+  const [inputValue, setInPutValue] = useState("");
   const [clickValue, setClickValue] = useState("Long");
   const [isShortClick, setIsShortClick] = useState(false);
   const [isLongClick, setIsLongClick] = useState(true);
   const [rightHeight, setRightHeight] = useState(window.innerHeight * 0.5);
+  const [localGetBalance, setLocalGetBalance] = useState(0);
+
+  const network = {
+    chainId: "constantine-2",
+    endpoint: "https://rpc.constantine-2.archway.tech",
+    prefix: "archway",
+  };
+
+  const GetMyBalance = async () => {
+    const gasPrice = GasPrice.fromString("0.01uconst");
+    const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
+    const accounts = await offlineSigner.getAccounts();
+    const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
+      gasPrice,
+      prefix: network.prefix,
+    });
+    const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+    console.log(clientBalance.amount);
+    setLocalGetBalance(clientBalance.amount);
+  };
+  useEffect(() => {
+    GetMyBalance();
+  }, []);
+
   const updateRightHeight = () => {
     setRightHeight(window.innerHeight * 0.5);
   };
 
-  //arch3.js
-
   const handleLongClick = () => {
     setIsShortClick(false);
     setIsLongClick(true);
+    GetMyBalance();
   };
   const handleShortClick = () => {
     setIsShortClick(true);
@@ -137,6 +161,7 @@ function LongShort() {
           onClick={(e) => {
             setClickValue("Long");
             handleLongClick();
+            console.log(setLocalGetBalance);
           }}
         >
           Long
@@ -157,9 +182,12 @@ function LongShort() {
       </BtnTotal>
       <InputDiv>
         <InputPayBalnace>
-          {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} arch</div> : <div>Pay: 0.00 arch</div>}
+          {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} uConst</div> : <div>Pay: 0.00 uConst</div>}
 
-          <div>Balance: {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(6) : "0.000000"}</div>
+          <div>
+            Balance{" "}
+            <div> {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(6) : "0.000000"} Const</div>
+          </div>
         </InputPayBalnace>
         <InputAmount type="number" placeholder="0.0" value={inputValue} onChange={handleInputchange} />
       </InputDiv>
@@ -170,13 +198,13 @@ function LongShort() {
         </InputPayBalnace>
         <OutputAmount>
           {inputValue ? (
-            <div>Win: {Math.floor(inputValue * 1.96 * 1000000) / 1000000} arch</div>
+            <div>Win: {Math.floor(inputValue * 1.96 * 1000000) / 1000000} uConst</div>
           ) : (
-            <div>Win: 0.00 arch</div>
+            <div>Win: 0.00 uConst</div>
           )}
         </OutputAmount>
       </OutputDiv>
-      <SmartContractButton />
+      <SmartContractButton betType={clickValue} betAmount={inputValue} localGetBalance={localGetBalance} />
     </RightTotalInfo>
   );
 }

@@ -5,6 +5,7 @@ import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { useState } from "react";
 import styled from "styled-components";
 import { useContext } from "react";
+import { useEffect } from "react";
 
 dotenv.config();
 
@@ -29,73 +30,86 @@ const ExecuteButton = styled.button`
   }
 `;
 
-const SmartContractButton = () => {
+const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance, disabled }) => {
   const { setBalance } = useContext(BalanceContext);
   const [count, setCount] = useState(0);
+  const executeBalance = localGetBalance;
+  const [afterBalance, setAfterBalance] = useState(0);
+
   const network = {
     chainId: "constantine-2",
     endpoint: "https://rpc.constantine-2.archway.tech",
     prefix: "archway",
   };
   const ExecuteClick = async () => {
+    if (!betAmount || betAmount <= "0") {
+      alert("you need change the pay");
+      return;
+    }
     try {
-      const gasPrice = GasPrice.fromString("0.05uconst");
-      const executeFee = calculateFee(300_000, gasPrice);
-      const offlineSigner = window.getOfflineSigner(network.chainId);
+      const gasPrice = GasPrice.fromString("0.01uconst");
+      const executeFee = calculateFee(700_000, gasPrice);
+      const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
       const accounts = await offlineSigner.getAccounts();
-      const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner);
+      const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
+        gasPrice,
+        prefix: network.prefix,
+      });
       const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+      const duration = 50;
+      const position = positionType.toLowerCase();
 
+      const bettingAmount = betAmount;
+      console.log(testClient);
+      console.log(executeBalance);
+      console.log(position);
+      console.log("bet Amount", typeof bettingAmount);
       const executeContractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
-      const msg = { increment: {} };
+      const msg = {
+        betting: {
+          position,
+          duration,
+        },
+      };
 
       console.log("hi CA :", process.env.REACT_APP_CONTRACT_ADDRESS);
-      const { transactionHash, height } = await testClient.execute(
+      const { transactionHash, height, logs } = await testClient.execute(
         accounts[0].address,
         executeContractAddress,
         msg,
-        // "auto"
-
-        executeFee
+        // "auto",
+        executeFee,
+        undefined,
+        [
+          {
+            amount: bettingAmount.toString(),
+            denom: "uconst",
+          },
+        ]
       );
       const updatedClientBalance = await testClient.getBalance(accounts[0].address, "uconst");
-      setBalance(updatedClientBalance);
+      setBalance(updatedClientBalance.amount);
+      updateAfterBalance();
 
       console.log(executeFee);
       console.log(transactionHash);
       console.log(height);
+      console.log(logs);
       console.log("gasPrice:", gasPrice);
     } catch (err) {
       console.error(err);
     }
   };
-
-  const handleClick = async () => {
-    try {
-      //testing
-
-      //arch3.js
-      const client = await ArchwayClient.connect("https://rpc.constantine-2.archway.tech");
-      const contractAddress = "archway17n9jx8prmvgd75shthmmpdg5hprx3j0xdgvxcx4kdgz8229ett7qavxcc5";
-      const msg = { get_count: {} };
-      const { count } = await client.queryContractSmart(contractAddress, msg);
-      setCount(count);
-
-      //   console.log(clientBalance);
-      //   console.log(client);
-
-      //   console.log(offlineSigner);
-      //   console.log(accounts[0].address);
-      //   console.log(testClient);
-    } catch (error) {
-      console.error(error);
-    }
+  const updateAfterBalance = async () => {
+    setAfterBalance(afterBalance);
   };
 
   return (
     <div>
       <ExecuteBtnDiv>
-        <ExecuteButton onClick={ExecuteClick}>Execute Smart Contract</ExecuteButton>
+        <ExecuteButton disable={disabled} onClick={ExecuteClick}>
+          Execute Smart Contract
+        </ExecuteButton>
       </ExecuteBtnDiv>
     </div>
   );
