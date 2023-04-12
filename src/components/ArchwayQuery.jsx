@@ -64,6 +64,7 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
       console.log(executeBalance);
       console.log(position);
       console.log("bet Amount", typeof bettingAmount);
+      console.log(disabled);
       const executeContractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
       const msg = {
         betting: {
@@ -107,8 +108,9 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
   return (
     <div>
       <ExecuteBtnDiv>
-        <ExecuteButton disable={disabled} onClick={ExecuteClick}>
-          Execute Smart Contract
+        <ExecuteButton disabled={disabled} onClick={ExecuteClick}>
+          {!disabled ? "Execute Smart Contract" : "Connected Wallet"}
+          {/* Execute Smart Contract */}
         </ExecuteButton>
       </ExecuteBtnDiv>
     </div>

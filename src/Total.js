@@ -1,11 +1,16 @@
+import { useState } from "react";
 import Header from "./components/Header";
 import InfoChart from "./components/InfoChart";
+import WalletConnectionContext from "./WalletConnectionContext";
 
 function Total() {
+  const [isConnected, setIsConnected] = useState(false);
   return (
     <div>
-      <Header />
-      <InfoChart />
+      <WalletConnectionContext.Provider value={{ isConnected, setIsConnected }}>
+        <Header />
+        <InfoChart />
+      </WalletConnectionContext.Provider>
     </div>
   );
 }

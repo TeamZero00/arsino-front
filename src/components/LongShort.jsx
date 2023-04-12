@@ -4,6 +4,7 @@ import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
+import WalletConnectionContext from "../WalletConnectionContext";
 import SmartContractButton from "./ArchwayQuery";
 import BalanceContext from "./BalanceContext";
 
@@ -95,6 +96,7 @@ const OutputAmount = styled.div`
 `;
 
 function LongShort() {
+  const { isConnected } = useContext(WalletConnectionContext);
   const { balance, setBalance } = useContext(BalanceContext);
   const [inputValue, setInPutValue] = useState("");
   const [clickValue, setClickValue] = useState("Long");
@@ -133,6 +135,7 @@ function LongShort() {
     setIsShortClick(false);
     setIsLongClick(true);
     GetMyBalance();
+    console.log(isConnected);
   };
   const handleShortClick = () => {
     setIsShortClick(true);
@@ -204,7 +207,12 @@ function LongShort() {
           )}
         </OutputAmount>
       </OutputDiv>
-      <SmartContractButton betType={clickValue} betAmount={inputValue} localGetBalance={localGetBalance} />
+      <SmartContractButton
+        betType={clickValue}
+        betAmount={inputValue}
+        localGetBalance={localGetBalance}
+        disabled={!isConnected}
+      />
     </RightTotalInfo>
   );
 }

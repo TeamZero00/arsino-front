@@ -5,6 +5,7 @@ import networkInfo from "../wallet/network_info";
 import BalanceContext from "./BalanceContext";
 import { FiExternalLink, FiCopy } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import WalletConnectionContext from "../WalletConnectionContext";
 
 const HeaderDiv = styled.div`
   border-bottom: solid 1px gray;
@@ -166,6 +167,7 @@ function Header() {
   const [chainId, setChainId] = useState();
   const [walletName, setWalletName] = useState();
   const [isVisible, setVisible] = useState(false);
+  const { isConnected, setIsConnected } = useContext(WalletConnectionContext);
 
   // connectWallet 으로 전달할 함수
   const getInfo = (client, address, returnedBalance, chainId, walletName) => {
@@ -174,7 +176,7 @@ function Header() {
     setBalance(returnedBalance);
     setChainId(chainId);
     setWalletName(walletName);
-
+    setIsConnected(true);
     sessionStorage.setItem("client", JSON.stringify(client));
     sessionStorage.setItem("address", address);
     sessionStorage.setItem("balance", JSON.stringify(returnedBalance));
@@ -247,6 +249,7 @@ function Header() {
     setChainId();
     setAddress();
     setBalance();
+    setIsConnected(false);
     sessionStorage.removeItem("client");
     sessionStorage.removeItem("address");
     sessionStorage.removeItem("balance");
@@ -283,11 +286,11 @@ function Header() {
         <ArsinoImg alt="brandMark" src="src/HeaderBrandMark.svg" />
       </LeftHeaderNavi>
       <div>
-        <Link to={"/swap"}>Swap Page</Link>
+        <Link to={"/swap"}>Bank</Link>
       </div>
       <RightHeaderNavi>
         <div>
-          <Link to={"/trade"} style={{ textDecoration: "none" }}>
+          <Link to={"/trade"} style={{ textDecoration: "none", color: "red" }}>
             Trade
           </Link>
         </div>
