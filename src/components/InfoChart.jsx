@@ -23,8 +23,6 @@ const WidthInnerData = styled.div`
 const ChartDiv = styled.div`
   display: flex;
 
-  width: 600px;
-
   justify-content: left;
 `;
 const TopChartInfo = styled.div`

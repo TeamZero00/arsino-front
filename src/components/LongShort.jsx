@@ -145,7 +145,18 @@ function LongShort() {
     setClickValue(e.target.value);
   };
   const handleInputchange = (e) => {
-    setInPutValue(e.target.value);
+    let value = e.target.value;
+    let regex = /^(\d+)?([.]?\d{0,6})?$/; // deciaml can six number
+    if (parseFloat(value) < 0) {
+      value = "0";
+    }
+    value = value.replace(/^0+/, "");
+    if (value.startsWith(".")) {
+      value = "0" + value;
+    }
+    if (value === "" || regex.test(value)) {
+      setInPutValue(value);
+    }
   };
 
   useEffect(() => {
@@ -185,7 +196,7 @@ function LongShort() {
       </BtnTotal>
       <InputDiv>
         <InputPayBalnace>
-          {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} uConst</div> : <div>Pay: 0.00 uConst</div>}
+          {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} Const</div> : <div>Pay: 0.00 Const</div>}
 
           <div>
             Balance{" "}
@@ -197,13 +208,13 @@ function LongShort() {
       <OutputDiv>
         <InputPayBalnace>
           <div>{clickValue}</div>
-          <div>Leverage 2x</div>
+          <div>5min x1.96</div>
         </InputPayBalnace>
         <OutputAmount>
           {inputValue ? (
-            <div>Win: {Math.floor(inputValue * 1.96 * 1000000) / 1000000} uConst</div>
+            <div>Win: {Math.floor(inputValue * 1.96 * 1000000) / 1000000} Const</div>
           ) : (
-            <div>Win: 0.00 uConst</div>
+            <div>Win: 0.00 Const</div>
           )}
         </OutputAmount>
       </OutputDiv>

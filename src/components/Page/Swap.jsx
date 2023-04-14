@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import styled from "styled-components";
+import BalanceContext from "../BalanceContext";
 import Header from "../Header";
 
 const BankWrapper = styled.div`
@@ -13,7 +14,7 @@ const BankWrapper = styled.div`
 const BankWrapperHeader = styled.div`
   border: 1px solid #2e2e2e;
   background-color: #181818;
-  width: 50%;
+  width: 550px;
   margin: 30px;
   border-radius: 5px;
   padding-top: 20px;
@@ -57,7 +58,7 @@ const BankTotalPool = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 50%;
+  width: 550px;
 `;
 const BankTotalPoolDiv = styled.div`
   display: flex;
@@ -86,12 +87,12 @@ const BankWrapperSupply = styled.div`
 
   margin: 10px 0;
   margin-top: 70px;
-  border: 1px solid #2e2e2e;
+
   border-radius: 3px;
-  width: 50%;
+  width: 550px;
   button {
-    background-color: #f76a2d;
-    width: 50%;
+    background-color: black;
+    width: 550px;
     font-size: 15px;
     font-weight: 700;
     height: 50px;
@@ -106,7 +107,7 @@ const BankWrapperSupply = styled.div`
 // deposit or withdraw click Div
 const DepositDiv = styled.div`
   border-radius: 5px;
-  width: 50%;
+  width: 550px;
   margin-bottom: 20px;
 `;
 const DepositWrapper = styled.div`
@@ -209,50 +210,251 @@ const WithdrawAssetInner = styled.div`
   align-items: center;
 `;
 
-function WithdrawForm() {
-  return (
-    <div>
-      <WithdrawWrapper>
-        <WithdrawTitle>
-          <div>asset</div>
-        </WithdrawTitle>
-        <WithdrawTitle>
-          <div>Balance</div>
-        </WithdrawTitle>
-      </WithdrawWrapper>
-      <WithdrawAsset>
-        <button>
-          <WithdrawAssetInner>
-            <div>AMG (LP)</div>
-          </WithdrawAssetInner>
-          <WithdrawAssetInner>
-            <div>1234.23</div>
-          </WithdrawAssetInner>
-        </button>
-      </WithdrawAsset>
-    </div>
-  );
-}
-
-// start Modal
+// start deposit Modal
 const DepositModalWrapper = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #2d2d2dab;
+  background-color: #181818dd;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 5000;
 `;
+const DepositModalDiv = styled.div`
+  padding: 30px;
+  background-color: black;
+  color: #e4e9f0;
+  width: 420px;
+  border-radius: 10px;
+  font-size: 25px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+const DepositModalTitle = styled.div`
+  width: 100%;
+  display: flex;
+  margin: 0 20px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  button {
+    border: none;
+    background-color: black;
+    color: white;
+    font-size: 25px;
+    font-weight: 650;
+    padding: 10px;
+    &:hover {
+      cursor: pointer;
+      color: #ff4d00;
+    }
+  }
+`;
+const DepositModalContent = styled.div`
+  color: #f76a2d;
+  padding: 10px 20px;
+  border-bottom: 2px solid #ff4d00;
+  div {
+    font-size: 25px;
+  }
+`;
+const DepositModalInputTotal = styled.div`
+  display: flex;
+  background-color: #181818;
+  margin: 20px 10px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid #2e2e2e;
+`;
+const DepositModalInputDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  color: #d3d3d3;
 
-function ViewdepositModal() {
-  return <DepositModalWrapper>viewit</DepositModalWrapper>;
-}
+  input {
+    background-color: #181818;
+    border-radius: 5px;
+    width: 400px;
+    height: 35px;
+    outline: none;
+    color: #e4e9f0;
+    font-size: 25px;
+    font-weight: 500;
+    border: none;
+    ::-webkit-inner-spin-button,
+    ::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+`;
+const DepositModalInputAmount = styled.div`
+  display: flex;
+  justify-content: left;
+  font-size: 13px;
+  color: #c3c3c3;
+  margin-top: 10px;
+`;
+const DepositModalOutputDiv = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 2px solid #2e2e2e;
+  font-size: 13px;
+`;
+const DepositContractDiv = styled.div`
+  width: 100%;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  button {
+    background-color: #ff4d00;
+    border: none;
+    color: white;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 640;
+    width: 80%;
+    height: 50px;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+`;
+//start WithdrawFrom
+const WithdrawModalWrapper = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #181818dd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5000;
+`;
+const WithdrawModalDiv = styled.div`
+  padding: 30px;
+  background-color: black;
+  color: #e4e9f0;
+  width: 420px;
+  border-radius: 10px;
+  font-size: 25px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+const WithdrawModalTitle = styled.div`
+  width: 100%;
+  display: flex;
+  margin: 0 20px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  button {
+    border: none;
+    background-color: black;
+    color: white;
+    font-size: 25px;
+    font-weight: 650;
+    padding: 10px;
+    &:hover {
+      cursor: pointer;
+      color: #ff4d00;
+    }
+  }
+`;
+const WithdrawModalContent = styled.div`
+  color: #f76a2d;
+  padding: 10px 20px;
+  border-bottom: 2px solid #ff4d00;
+  div {
+    font-size: 25px;
+  }
+`;
+const WithdrawModalInputTotal = styled.div`
+  display: flex;
+  background-color: #181818;
+  margin: 20px 10px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid #2e2e2e;
+`;
+const WithdrawModalInputDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  color: #d3d3d3;
+
+  input {
+    background-color: #181818;
+    border-radius: 5px;
+    width: 400px;
+    height: 35px;
+    outline: none;
+    color: #e4e9f0;
+    font-size: 25px;
+    font-weight: 500;
+    border: none;
+    ::-webkit-inner-spin-button,
+    ::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+`;
+const WithdrawModalInputAmount = styled.div`
+  display: flex;
+  justify-content: left;
+  font-size: 13px;
+  color: #c3c3c3;
+  margin-top: 10px;
+`;
+const WithdrawModalOutputDiv = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 20px;
+  border-top: 2px solid #2e2e2e;
+  font-size: 13px;
+`;
+const WithdrawContractDiv = styled.div`
+  width: 100%;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  button {
+    background-color: #ff4d00;
+    border: none;
+    color: white;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 640;
+    width: 80%;
+    height: 50px;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+`;
 
 function Swap() {
+  const { balance, setBalance } = useContext(BalanceContext);
   const [clickDeposit, setClickDeposit] = useState(true);
   const [clickWithdraw, setClickWithdraw] = useState(false);
   const [depositIsOpen, setDepositIsOpen] = useState(false);
@@ -295,6 +497,96 @@ function Swap() {
     );
   };
 
+  const ViewdepositModal = () => {
+    return (
+      <DepositModalWrapper>
+        <DepositModalDiv>
+          <DepositModalTitle>
+            CONST<button onClick={ClickedIsOpen}>X</button>
+          </DepositModalTitle>
+          <div>
+            <DepositModalContent>
+              <div>Deposit</div>
+            </DepositModalContent>
+          </div>
+          <DepositModalInputTotal>
+            <DepositModalInputDiv>
+              <input type="number" placeholder="0.0"></input>
+              <DepositModalInputAmount>
+                balance: {balance && balance.amount ? balance.amount : "0"}
+              </DepositModalInputAmount>
+            </DepositModalInputDiv>
+          </DepositModalInputTotal>
+          <DepositModalOutputDiv>
+            <div>receive LP</div>
+            <div>0 Token</div>
+          </DepositModalOutputDiv>
+          <DepositContractDiv>
+            <button>Enter</button>
+          </DepositContractDiv>
+        </DepositModalDiv>
+      </DepositModalWrapper>
+    );
+  };
+
+  const WithdrawForm = () => {
+    return (
+      <div>
+        <WithdrawWrapper>
+          <WithdrawTitle>
+            <div>asset</div>
+          </WithdrawTitle>
+          <WithdrawTitle>
+            <div>Balance</div>
+          </WithdrawTitle>
+        </WithdrawWrapper>
+        <WithdrawAsset>
+          <button onClick={ClickedIsOpen}>
+            <WithdrawAssetInner>
+              <div>AMG (LP)</div>
+            </WithdrawAssetInner>
+            <WithdrawAssetInner>
+              <div>1234.23</div>
+            </WithdrawAssetInner>
+          </button>
+        </WithdrawAsset>
+        {depositIsOpen && <ViewWithdrawModal />}
+      </div>
+    );
+  };
+
+  const ViewWithdrawModal = () => {
+    return (
+      <WithdrawModalWrapper>
+        <WithdrawModalDiv>
+          <WithdrawModalTitle>
+            AMG (LP)<button onClick={ClickedIsOpen}>X</button>
+          </WithdrawModalTitle>
+          <div>
+            <WithdrawModalContent>
+              <div>Withdraw</div>
+            </WithdrawModalContent>
+          </div>
+          <WithdrawModalInputTotal>
+            <WithdrawModalInputDiv>
+              <input type="number" placeholder="0.0"></input>
+              <WithdrawModalInputAmount>
+                (ex. LP BALANCE) balance: {balance && balance.amount ? balance.amount : "0"}
+              </WithdrawModalInputAmount>
+            </WithdrawModalInputDiv>
+          </WithdrawModalInputTotal>
+          <WithdrawModalOutputDiv>
+            <div>receive CONST</div>
+            <div>0 CONST</div>
+          </WithdrawModalOutputDiv>
+          <WithdrawContractDiv>
+            <button>Enter</button>
+          </WithdrawContractDiv>
+        </WithdrawModalDiv>
+      </WithdrawModalWrapper>
+    );
+  };
+
   return (
     <div>
       <Header />
@@ -322,7 +614,7 @@ function Swap() {
             onClick={(event) => {
               ClickedDeposit();
             }}
-            style={{ backgroundColor: clickDeposit ? "#ff4d00" : "#181818" }}
+            style={{ borderBottom: clickDeposit ? "2px solid #ff4d00" : "none" }}
           >
             Deposit
           </button>
@@ -330,12 +622,12 @@ function Swap() {
             onClick={(event) => {
               ClickedWithdraw();
             }}
-            style={{ backgroundColor: clickWithdraw ? "#ff4d00" : "#181818" }}
+            style={{ borderBottom: clickWithdraw ? "2px solid #ff4d00" : "none" }}
           >
             Withdraw
           </button>
         </BankWrapperSupply>
-        <DepositDiv>{clickDeposit ? <DepositForm /> : <WithdrawForm>hi</WithdrawForm>}</DepositDiv>
+        <DepositDiv>{clickDeposit ? <DepositForm /> : <WithdrawForm />}</DepositDiv>
       </BankWrapper>
     </div>
   );

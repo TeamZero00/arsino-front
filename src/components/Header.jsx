@@ -4,8 +4,10 @@ import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
 import BalanceContext from "./BalanceContext";
 import { FiExternalLink, FiCopy } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import WalletConnectionContext from "../WalletConnectionContext";
+import dotenv from "dotenv";
+dotenv.config();
 
 const HeaderDiv = styled.div`
   border-bottom: solid 1px gray;
@@ -25,6 +27,23 @@ const LogoName = styled.div`
 
 const LeftHeaderNavi = styled.div`
   display: flex;
+`;
+const LeftHeaderLink = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 640;
+  margin-left: 5px;
+
+  a {
+    border-radius: 10px;
+    padding: 3px 10px;
+    color: white;
+    &:hover {
+      background-color: #2e2e2e;
+      color: #ff4d00;
+    }
+  }
 `;
 const RightHeaderNavi = styled.div`
   display: flex;
@@ -66,6 +85,7 @@ const TradeLinkBtn = styled.div`
 const ArsinoImg = styled.img`
   height: 40px;
   padding: 10px;
+  margin-right: 20px;
 `;
 
 const DownBtnDiv = styled.div`
@@ -159,6 +179,19 @@ const ModalMainInnerDiv = styled.div`
   }
 `;
 
+const FaucetBtn = styled.button`
+  border: none;
+  padding: 10px 15px;
+  font-size: 15px;
+  font-weight: 600;
+  background-color: #ff4d00;
+  margin-right: 10px;
+  border-radius: 5px;
+  color: white;
+  &:hover {
+    cursor: pointer;
+  }
+`;
 function Header() {
   const { balance, setBalance } = useContext(BalanceContext);
   // connectWallet에서 받아올 값
@@ -168,7 +201,28 @@ function Header() {
   const [walletName, setWalletName] = useState();
   const [isVisible, setVisible] = useState(false);
   const { isConnected, setIsConnected } = useContext(WalletConnectionContext);
+  const [isTradeClicked, setIsTradeClicked] = useState(false);
+  const [isBankClicked, setIsBankClicked] = useState(false);
 
+  const location = useLocation();
+
+  const TradeLinkClicked = () => {
+    setIsTradeClicked(true);
+    setIsBankClicked(false);
+  };
+  const BankLinkClicked = () => {
+    setIsTradeClicked(false);
+    setIsBankClicked(true);
+  };
+  useEffect(() => {
+    if (location.pathname === "/trade") {
+      setIsTradeClicked(true);
+      setIsBankClicked(false);
+    } else if (location.pathname === "/bank") {
+      setIsTradeClicked(false);
+      setIsBankClicked(true);
+    }
+  }, [location]);
   // connectWallet 으로 전달할 함수
   const getInfo = (client, address, returnedBalance, chainId, walletName) => {
     setClient(client);
@@ -242,7 +296,6 @@ function Header() {
       </>
     );
   };
-
   // connectWallet으로 가져온 정보를 초기화
   const disconnect = (event) => {
     setClient();
@@ -259,6 +312,7 @@ function Header() {
   const disBtnClick = () => {
     setVisible(!isVisible);
   };
+
   // 네트워크 별로 chainId에 따라서 DISCONNECT와 CONNECT 버튼이 나타나도록 구현
   const renderBtn = () => {
     return Object.keys(networkInfo).map((id) => {
@@ -284,17 +338,28 @@ function Header() {
     <HeaderDiv>
       <LeftHeaderNavi>
         <ArsinoImg alt="brandMark" src="src/HeaderBrandMark.svg" />
-      </LeftHeaderNavi>
-      <div>
-        <Link to={"/swap"}>Bank</Link>
-      </div>
-      <RightHeaderNavi>
-        <div>
-          <Link to={"/trade"} style={{ textDecoration: "none", color: "red" }}>
+        <LeftHeaderLink>
+          <Link
+            to={"/trade"}
+            style={{ textDecoration: "none", color: isTradeClicked ? "#ff4d00" : "none" }}
+            onClick={TradeLinkClicked}
+          >
             Trade
           </Link>
-        </div>
+        </LeftHeaderLink>
+        <LeftHeaderLink>
+          <Link
+            to={"/bank"}
+            style={{ textDecoration: "none", color: isBankClicked ? "#ff4d00" : "none" }}
+            onClick={BankLinkClicked}
+          >
+            Bank
+          </Link>
+        </LeftHeaderLink>
+      </LeftHeaderNavi>
 
+      <RightHeaderNavi>
+        <FaucetBtn onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}>Faucet</FaucetBtn>
         <div>{renderBtn()}</div>
       </RightHeaderNavi>
     </HeaderDiv>

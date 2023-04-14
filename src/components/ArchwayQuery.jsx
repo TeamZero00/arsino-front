@@ -63,7 +63,6 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
       console.log(testClient);
       console.log(executeBalance);
       console.log(position);
-      console.log("bet Amount", typeof bettingAmount);
       console.log(disabled);
       const executeContractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
       const msg = {
@@ -83,19 +82,20 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
         undefined,
         [
           {
-            amount: bettingAmount.toString(),
+            amount: (bettingAmount * 1000000).toString(),
             denom: "uconst",
           },
         ]
       );
       const updatedClientBalance = await testClient.getBalance(accounts[0].address, "uconst");
-      setBalance(updatedClientBalance.amount);
+      setBalance(updatedClientBalance);
       updateAfterBalance();
 
       console.log(executeFee);
       console.log(transactionHash);
       console.log(height);
       console.log(logs);
+      console.log(updatedClientBalance);
       console.log("gasPrice:", gasPrice);
     } catch (err) {
       console.error(err);

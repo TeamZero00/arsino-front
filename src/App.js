@@ -19,7 +19,7 @@ function App({ getInfo }) {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/trade" element={<Total />} />
-          <Route path="/swap" element={<Swap />} />
+          <Route path="/bank" element={<Swap />} />
         </Routes>
       </div>
     </BalanceContext.Provider>
