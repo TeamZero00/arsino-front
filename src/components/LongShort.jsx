@@ -150,7 +150,6 @@ function LongShort() {
     if (parseFloat(value) < 0) {
       value = "0";
     }
-    value = value.replace(/^0+/, "");
     if (value.startsWith(".")) {
       value = "0" + value;
     }

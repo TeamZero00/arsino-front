@@ -94,7 +94,7 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
       console.log(executeFee);
       console.log(transactionHash);
       console.log(height);
-      console.log(logs);
+      console.log(logs[0].events[5].attributes);
       console.log(updatedClientBalance);
       console.log("gasPrice:", gasPrice);
     } catch (err) {

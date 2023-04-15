@@ -53,60 +53,98 @@ const DataTitle = styled.div`
 `;
 
 function InfoChart() {
-  const [coinInfo, setCoinInfo] = useState({
+  const [eurInfo, setEurInfo] = useState({
     current: null,
     previous: null,
   });
-  const [priceChangePercent, setPriceChangePercent] = useState(null);
-  const [highPrice, setHighPrice] = useState(null);
-  const [lowPrice, setLowPrice] = useState(null);
-  const [changePrice, setChangePrice] = useState(null);
 
+  // eur/usd state
+  const [eurDefinedLowPrice, setEurDefinedLowPrice] = useState(null);
+  const [eurDefinedHighPrice, setEurDefinedHighPrice] = useState(null);
+  const [eurDefinedNowPrice, setEurDefinedNowPrice] = useState(null);
+  const [eurDefinedbefore24hPrice, setEurDefinedbefore24hPrice] = useState(null);
+  const [eurDefinedCalc24hPrice, setEurDefinedCalc24hPrice] = useState(null);
+  const [eurDefinedCalc24hPricePercent, setEurDefinedCalc24hPricePercent] = useState(null);
+  // EUR/USD
   useEffect(() => {
-    const tickerClient = new W3CWebSocket("wss://stream.binance.com:9443/ws/btcusdt@ticker");
-    //클라인 클라이언트
-    tickerClient.onopen = () => {
-      console.log("WebSocket Client Connected");
+    const eurClient = new W3CWebSocket("ws://66.42.38.167:8080");
+    // DB WS
+    eurClient.onopen = () => {
+      console.log("EUR/USD Client Connected");
     };
-    tickerClient.onmessage = (message) => {
-      const tickerData = JSON.parse(message.data);
+    eurClient.onmessage = (message) => {
+      const eurData = JSON.parse(message.data);
 
-      setCoinInfo((prevState) => ({
-        current: Number(tickerData.c),
-        previous: prevState.current,
-      }));
-      setPriceChangePercent(Number(tickerData.P).toFixed(2));
-      setHighPrice(Number(tickerData.h).toFixed(2));
-      setLowPrice(Number(tickerData.l).toFixed(2));
-      setChangePrice(Number(tickerData.p).toFixed(2));
-      // console.log(klineData.k);
+      if (eurData.data.lowPrice !== undefined) {
+        let definedLowPrice = eurData.data.lowPrice;
+        setEurDefinedLowPrice(definedLowPrice);
+      }
+      if (eurData.data.highPrice !== undefined) {
+        let definedHighPrice = eurData.data.highPrice;
+        setEurDefinedHighPrice(definedHighPrice);
+      }
+      if (eurData.data.nowPrice !== undefined) {
+        let definedNowPrice = eurData.data.nowPrice;
+        setEurDefinedNowPrice(definedNowPrice);
+        setEurInfo((prevState) => ({
+          current: eurData.data.nowPrice,
+          previous: prevState.current,
+        }));
+      }
+      if (eurData.data.befor24HourPrice !== undefined) {
+        let definedBefore24hPrice = eurData.data.befor24HourPrice;
+        setEurDefinedbefore24hPrice(definedBefore24hPrice);
+      }
+      if (eurData.data.nowPrice !== undefined && eurData.data.befor24HourPrice !== undefined) {
+        let definedCalc24hPrice = eurData.data.nowPrice - eurData.data.befor24HourPrice;
+        let FixedCalc24hPrice = definedCalc24hPrice.toFixed(5);
+        let definedCalc24hPricePercent =
+          ((eurData.data.nowPrice - eurData.data.befor24HourPrice) / eurData.data.befor24HourPrice) * 100;
+        let FixedCalc24hPricePercent = definedCalc24hPricePercent.toFixed(2);
+        setEurDefinedCalc24hPricePercent(FixedCalc24hPricePercent);
+        setEurDefinedCalc24hPrice(FixedCalc24hPrice);
+      }
     };
     return () => {
-      tickerClient.close();
+      eurClient.close();
     };
   }, []);
+
+  const getColor = () => {
+    if (eurInfo.previous && eurInfo.current > eurInfo.previous) {
+      return "#0ecb82";
+    } else if (eurInfo.previous && eurInfo.current < eurInfo.previous) {
+      return "#f7465d";
+    } else {
+      return "currentColor";
+    }
+  };
 
   return (
     <InfoMain>
       <LeftRight>
         <TopChartInfo>
-          {coinInfo ? <TitleInner>BTC/USDT</TitleInner> : <TitleInner>Loading...</TitleInner>}
+          {eurInfo ? <TitleInner>EUR/USD</TitleInner> : <TitleInner>Loading...</TitleInner>}
           <ChartDiv>
             <InnerTopChartInfo>
               <DataTitle>Price</DataTitle>
               <WidthInnerData
                 style={{
-                  color: coinInfo.previous && coinInfo.current > coinInfo.previous ? "#0ecb82" : "#f7465d",
+                  color: getColor(),
                 }}
               >
-                {coinInfo.current ? <div>$ {coinInfo.current.toFixed(2)}</div> : <div> wait...</div>}
+                {eurDefinedNowPrice !== null ? <div>$ {eurDefinedNowPrice}</div> : <div>wait..</div>}
               </WidthInnerData>
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h Change</DataTitle>
-              {priceChangePercent ? (
-                <WidthInnerData style={{ color: priceChangePercent > 0 ? "#0ecb82" : "#f7465d" }}>
-                  {changePrice} {priceChangePercent > 0 ? `+${priceChangePercent}` : priceChangePercent}%
+              {eurDefinedCalc24hPrice ? (
+                <WidthInnerData style={{ color: eurDefinedCalc24hPricePercent > 0 ? "#0ecb82" : "#f7465d" }}>
+                  {eurDefinedCalc24hPrice}{" "}
+                  {eurDefinedCalc24hPricePercent > 0
+                    ? `+${eurDefinedCalc24hPricePercent}`
+                    : eurDefinedCalc24hPricePercent}
+                  %
                 </WidthInnerData>
               ) : (
                 <div> wait...</div>
@@ -114,11 +152,11 @@ function InfoChart() {
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h High</DataTitle>
-              {highPrice ? <div>{highPrice}</div> : <div> wait...</div>}
+              {eurDefinedHighPrice ? <div>{eurDefinedHighPrice}</div> : <div> wait...</div>}
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h Low</DataTitle>
-              {lowPrice ? <div>{lowPrice}</div> : <div> wait...</div>}
+              {eurDefinedLowPrice ? <div>{eurDefinedLowPrice}</div> : <div> wait...</div>}
             </InnerTopChartInfo>
           </ChartDiv>
         </TopChartInfo>
