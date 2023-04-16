@@ -110,7 +110,6 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
       <ExecuteBtnDiv>
         <ExecuteButton disabled={disabled} onClick={ExecuteClick}>
           {!disabled ? "Execute Smart Contract" : "Connected Wallet"}
-          {/* Execute Smart Contract */}
         </ExecuteButton>
       </ExecuteBtnDiv>
     </div>

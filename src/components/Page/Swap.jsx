@@ -1,5 +1,8 @@
+import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
+import { GasPrice } from "@cosmjs/stargate";
 import { useContext, useState } from "react";
 import styled from "styled-components";
+import { client } from "websocket";
 import BalanceContext from "../BalanceContext";
 import Header from "../Header";
 
@@ -458,6 +461,16 @@ function Swap() {
   const [clickDeposit, setClickDeposit] = useState(true);
   const [clickWithdraw, setClickWithdraw] = useState(false);
   const [depositIsOpen, setDepositIsOpen] = useState(false);
+  const [isPoolBalance, setIsPoolBalance] = useState("");
+  const [myBalance, isMyBalance] = useState("");
+  const [myAddress, setMyAddress] = useState("");
+  const [isLPBalance, setIsLPBalance] = useState("");
+
+  const network = {
+    chainId: "constantine-2",
+    endpoint: "https://rpc.constantine-2.archway.tech",
+    prefix: "archway",
+  };
 
   const ClickedIsOpen = () => {
     setDepositIsOpen(!depositIsOpen);
@@ -470,6 +483,58 @@ function Swap() {
     setClickDeposit(false);
     setClickWithdraw(true);
   };
+
+  const networkInfo = async () => {
+    const gasPrice = GasPrice.fromString("0.01uconst");
+    const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
+    const accounts = await offlineSigner.getAccounts();
+    const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
+      gasPrice,
+      prefix: network.prefix,
+    });
+    const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+    isMyBalance(clientBalance.amount / 1000000);
+    setMyAddress(accounts[0].address);
+    console.log(myBalance);
+  };
+  networkInfo();
+
+  const getBankPool = async () => {
+    const client = await ArchwayClient.connect(network.endpoint);
+    const msg = {
+      get_pool: {},
+    };
+    try {
+      const bankContract = process.env.REACT_APP_BANKCONTRACT_ADDRESS;
+      const result = await client.queryContractSmart(bankContract, msg);
+      console.log(result.balance);
+      setIsPoolBalance(result.balance / 1000000);
+      return result;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  getBankPool();
+
+  console.log(myAddress);
+  //LP Pool balance
+  const getLPPool = async () => {
+    const client = await ArchwayClient.connect(network.endpoint);
+    const msg = {
+      balance: { address: myAddress },
+    };
+    try {
+      const result = await client.queryContractSmart(process.env.REACT_APP_LPCONTRACT_ADDRESS, msg);
+      console.log("getLPPool log", result);
+      setIsLPBalance(result.balance);
+      return result;
+    } catch (err) {
+      console.log("getLPPool err", err);
+    }
+  };
+  getLPPool();
+
+  const depositContract = async () => {};
 
   const DepositForm = () => {
     return (
@@ -488,7 +553,7 @@ function Swap() {
               <div>CONST</div>
             </DepositAssetInner>
             <DepositAssetInner>
-              <div>1234.23</div>
+              <div>{sessionStorage.getItem("walletConnection") != null ? myBalance : "0"}</div>
             </DepositAssetInner>
           </button>
         </DepositAsset>
@@ -513,7 +578,7 @@ function Swap() {
             <DepositModalInputDiv>
               <input type="number" placeholder="0.0"></input>
               <DepositModalInputAmount>
-                balance: {balance && balance.amount ? balance.amount : "0"}
+                balance: {sessionStorage.getItem("walletConnection") != null ? myBalance : "0"}
               </DepositModalInputAmount>
             </DepositModalInputDiv>
           </DepositModalInputTotal>
@@ -546,7 +611,7 @@ function Swap() {
               <div>AMG (LP)</div>
             </WithdrawAssetInner>
             <WithdrawAssetInner>
-              <div>1234.23</div>
+              <div>{sessionStorage.getItem("walletConnection") != null ? isLPBalance : "0"}</div>
             </WithdrawAssetInner>
           </button>
         </WithdrawAsset>
@@ -601,8 +666,8 @@ function Swap() {
         </BankWrapperHeader>
         <BankTotalPool>
           <BankTotalPoolDiv>
-            <BankTotalPoolInner>Total Pool Balance</BankTotalPoolInner>
-            <BankTotalPoolData>123456789.00</BankTotalPoolData>
+            <BankTotalPoolInner>Total Pool Balance (CONST)</BankTotalPoolInner>
+            <BankTotalPoolData>{isPoolBalance}</BankTotalPoolData>
           </BankTotalPoolDiv>
           <BankTotalPoolDiv>
             <BankTotalPoolInner>Balance in Play</BankTotalPoolInner>

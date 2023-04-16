@@ -4,9 +4,10 @@ import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
 import BalanceContext from "./BalanceContext";
 import { FiExternalLink, FiCopy } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Route, useLocation } from "react-router-dom";
 import WalletConnectionContext from "../WalletConnectionContext";
 import dotenv from "dotenv";
+import Swap from "./Page/Swap";
 dotenv.config();
 
 const HeaderDiv = styled.div`
@@ -230,12 +231,13 @@ function Header() {
     setBalance(returnedBalance);
     setChainId(chainId);
     setWalletName(walletName);
-    setIsConnected(true);
     sessionStorage.setItem("client", JSON.stringify(client));
     sessionStorage.setItem("address", address);
     sessionStorage.setItem("balance", JSON.stringify(returnedBalance));
     sessionStorage.setItem("chainId", chainId);
     sessionStorage.setItem("walletName", JSON.stringify(walletName));
+    sessionStorage.setItem("walletConnection", true);
+    console.log(isConnected);
   };
   useEffect(() => {
     const savedClient = JSON.parse(sessionStorage.getItem("client"));
@@ -308,6 +310,7 @@ function Header() {
     sessionStorage.removeItem("balance");
     sessionStorage.removeItem("chainId");
     sessionStorage.removeItem("walletName");
+    sessionStorage.removeItem("walletConnection");
   };
   const disBtnClick = () => {
     setVisible(!isVisible);
@@ -334,6 +337,7 @@ function Header() {
       );
     });
   };
+
   return (
     <HeaderDiv>
       <LeftHeaderNavi>

@@ -5,11 +5,12 @@ import WalletConnectionContext from "./WalletConnectionContext";
 
 function Total() {
   const [isConnected, setIsConnected] = useState(false);
+
   return (
     <div>
       <WalletConnectionContext.Provider value={{ isConnected, setIsConnected }}>
         <Header />
-        <InfoChart />
+        <InfoChart isConnected={isConnected} />
       </WalletConnectionContext.Provider>
     </div>
   );

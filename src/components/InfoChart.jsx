@@ -17,13 +17,10 @@ const LeftRight = styled.div`
 
 const WidthInnerData = styled.div`
   display: flex;
-  width: 130px;
-  justify-content: center;
+  justify-content: left;
 `;
 const ChartDiv = styled.div`
   display: flex;
-
-  justify-content: left;
 `;
 const TopChartInfo = styled.div`
   display: flex;
@@ -31,14 +28,18 @@ const TopChartInfo = styled.div`
   align-items: center;
   background-color: #181818;
   margin: 10px 0px;
-
+  padding: 3px 0px;
   border: 0.5px solid #2e2e2e;
   border-radius: 3px;
 `;
 const InnerTopChartInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   color: white;
   margin: 10px 0 10px 0;
-  padding-right: 20px;
+  padding: 0px 30px;
 `;
 const TitleInner = styled.div`
   padding: 10px 30px;
@@ -74,7 +75,7 @@ function InfoChart() {
     };
     eurClient.onmessage = (message) => {
       const eurData = JSON.parse(message.data);
-
+      console.log(eurData);
       if (eurData.data.lowPrice !== undefined) {
         let definedLowPrice = eurData.data.lowPrice;
         setEurDefinedLowPrice(definedLowPrice);

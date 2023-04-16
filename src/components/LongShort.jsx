@@ -120,7 +120,6 @@ function LongShort() {
       prefix: network.prefix,
     });
     const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
-    console.log(clientBalance.amount);
     setLocalGetBalance(clientBalance.amount);
   };
   useEffect(() => {
@@ -135,7 +134,7 @@ function LongShort() {
     setIsShortClick(false);
     setIsLongClick(true);
     GetMyBalance();
-    console.log(isConnected);
+    console.log(sessionStorage.getItem("walletConnection"));
   };
   const handleShortClick = () => {
     setIsShortClick(true);
@@ -174,7 +173,6 @@ function LongShort() {
           onClick={(e) => {
             setClickValue("Long");
             handleLongClick();
-            console.log(setLocalGetBalance);
           }}
         >
           Long
@@ -198,8 +196,7 @@ function LongShort() {
           {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} Const</div> : <div>Pay: 0.00 Const</div>}
 
           <div>
-            Balance{" "}
-            <div> {balance && balance.amount ? parseFloat(balance.amount / 1000000).toFixed(6) : "0.000000"} Const</div>
+            Balance <div> {localGetBalance ? parseFloat(localGetBalance / 1000000).toFixed(6) : "0.000000"} Const</div>
           </div>
         </InputPayBalnace>
         <InputAmount type="number" placeholder="0.0" value={inputValue} onChange={handleInputchange} />
@@ -221,7 +218,7 @@ function LongShort() {
         betType={clickValue}
         betAmount={inputValue}
         localGetBalance={localGetBalance}
-        disabled={!isConnected}
+        disabled={!sessionStorage.getItem("walletConnection")}
       />
     </RightTotalInfo>
   );

@@ -131,7 +131,6 @@ const CandlestickChart = () => {
           x: timestamp,
           y: [open, high, low, close],
         };
-
         if (isMounted) {
           setSeries((prevState) => {
             let data = [...prevState[0].data];
@@ -148,6 +147,7 @@ const CandlestickChart = () => {
                 data.shift();
               }
             }
+
             const currentTime = Date.now();
             const sixHoursAgo = currentTime - 3 * 60 * 60 * 1000;
             data = data.filter((candlestick) => candlestick.x >= sixHoursAgo);
