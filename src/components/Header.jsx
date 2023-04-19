@@ -237,7 +237,6 @@ function Header() {
     sessionStorage.setItem("chainId", chainId);
     sessionStorage.setItem("walletName", JSON.stringify(walletName));
     sessionStorage.setItem("walletConnection", true);
-    console.log(isConnected);
   };
   useEffect(() => {
     const savedClient = JSON.parse(sessionStorage.getItem("client"));

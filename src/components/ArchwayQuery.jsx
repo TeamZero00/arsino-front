@@ -60,10 +60,6 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
       const position = positionType.toLowerCase();
 
       const bettingAmount = betAmount;
-      console.log(testClient);
-      console.log(executeBalance);
-      console.log(position);
-      console.log(disabled);
       const executeContractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
       const msg = {
         betting: {

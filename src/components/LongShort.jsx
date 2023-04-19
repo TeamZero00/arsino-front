@@ -2,6 +2,7 @@ import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
 import { GasPrice } from "@cosmjs/stargate";
 import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
+import RealtimePosition from "./RealtimePosition";
 import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
 import WalletConnectionContext from "../WalletConnectionContext";
@@ -12,7 +13,7 @@ const RightTotalInfo = styled.div`
   border: 0.5px solid #2e2e2e;
   border-radius: 3px;
   margin: 10px 0 0 10px;
-  height: (rightHeight);
+  height: ${({ rightHeight }) => rightHeight}px;
   padding: 10px;
   width: 30%;
   background-color: black;
@@ -95,14 +96,14 @@ const OutputAmount = styled.div`
   margin: 10px;
 `;
 
-function LongShort() {
+function LongShort({ initGameData }) {
   const { isConnected } = useContext(WalletConnectionContext);
   const { balance, setBalance } = useContext(BalanceContext);
   const [inputValue, setInPutValue] = useState("");
   const [clickValue, setClickValue] = useState("Long");
   const [isShortClick, setIsShortClick] = useState(false);
   const [isLongClick, setIsLongClick] = useState(true);
-  const [rightHeight, setRightHeight] = useState(window.innerHeight * 0.5);
+  const [rightHeight, setRightHeight] = useState(window.innerHeight * 0.45);
   const [localGetBalance, setLocalGetBalance] = useState(0);
 
   const network = {
@@ -127,7 +128,7 @@ function LongShort() {
   }, []);
 
   const updateRightHeight = () => {
-    setRightHeight(window.innerHeight * 0.5);
+    setRightHeight(window.innerHeight * 0.45);
   };
 
   const handleLongClick = () => {
@@ -220,6 +221,9 @@ function LongShort() {
         localGetBalance={localGetBalance}
         disabled={!sessionStorage.getItem("walletConnection")}
       />
+      <div>
+        <RealtimePosition height={`${rightHeight - 195}px`} initGameData={initGameData} />
+      </div>
     </RightTotalInfo>
   );
 }

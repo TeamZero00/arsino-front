@@ -18,6 +18,7 @@ const LeftRight = styled.div`
 const WidthInnerData = styled.div`
   display: flex;
   justify-content: left;
+  font-size: 18px;
 `;
 const ChartDiv = styled.div`
   display: flex;
@@ -36,10 +37,10 @@ const InnerTopChartInfo = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
+
   color: white;
   margin: 10px 0 10px 0;
-  padding: 0px 30px;
+  padding-right: 30px;
 `;
 const TitleInner = styled.div`
   padding: 10px 30px;
@@ -49,11 +50,20 @@ const TitleInner = styled.div`
   align-items: center;
 `;
 const DataTitle = styled.div`
+  display: flex;
+  justify-content: left;
+  align-items: left;
   color: #999999;
   font-size: 12px;
 `;
+const TitleInnerData = styled.div`
+  display: flex;
+  justify-content: left;
+  font-size: 13px;
+  font-weight: 500;
+`;
 
-function InfoChart() {
+function InfoChart({ isConnected }) {
   const [eurInfo, setEurInfo] = useState({
     current: null,
     previous: null,
@@ -66,6 +76,8 @@ function InfoChart() {
   const [eurDefinedbefore24hPrice, setEurDefinedbefore24hPrice] = useState(null);
   const [eurDefinedCalc24hPrice, setEurDefinedCalc24hPrice] = useState(null);
   const [eurDefinedCalc24hPricePercent, setEurDefinedCalc24hPricePercent] = useState(null);
+  const [isBettingUpdates, setIsBettingupdates] = useState(null);
+  const [initGameData, setInitGameData] = useState(null);
   // EUR/USD
   useEffect(() => {
     const eurClient = new W3CWebSocket("ws://66.42.38.167:8080");
@@ -75,7 +87,32 @@ function InfoChart() {
     };
     eurClient.onmessage = (message) => {
       const eurData = JSON.parse(message.data);
-      console.log(eurData);
+
+      switch (JSON.parse(message.data).method) {
+        case "price_update":
+          console.log("price update");
+          break;
+        case "betting_update":
+          setInitGameData(eurData.data);
+
+          break;
+        case "new_chart":
+          console.log("new chart");
+          break;
+        case "init": {
+          setInitGameData(eurData.data.game);
+          break;
+        }
+        default:
+          break;
+      }
+
+      // const arrEurData = eurData.Data.map((item) => item);
+      // console.log(arrEurData);
+      if (eurData.method == "betting_update") {
+        setIsBettingupdates(eurData.data);
+      }
+
       if (eurData.data.lowPrice !== undefined) {
         let definedLowPrice = eurData.data.lowPrice;
         setEurDefinedLowPrice(definedLowPrice);
@@ -128,24 +165,25 @@ function InfoChart() {
           {eurInfo ? <TitleInner>EUR/USD</TitleInner> : <TitleInner>Loading...</TitleInner>}
           <ChartDiv>
             <InnerTopChartInfo>
-              <DataTitle>Price</DataTitle>
               <WidthInnerData
                 style={{
                   color: getColor(),
                 }}
               >
-                {eurDefinedNowPrice !== null ? <div>$ {eurDefinedNowPrice}</div> : <div>wait..</div>}
+                {eurDefinedNowPrice !== null ? <div>${Number(eurDefinedNowPrice).toFixed(5)}</div> : <div>wait..</div>}
               </WidthInnerData>
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h Change</DataTitle>
               {eurDefinedCalc24hPrice ? (
                 <WidthInnerData style={{ color: eurDefinedCalc24hPricePercent > 0 ? "#0ecb82" : "#f7465d" }}>
-                  {eurDefinedCalc24hPrice}{" "}
-                  {eurDefinedCalc24hPricePercent > 0
-                    ? `+${eurDefinedCalc24hPricePercent}`
-                    : eurDefinedCalc24hPricePercent}
-                  %
+                  <TitleInnerData>{eurDefinedCalc24hPrice}</TitleInnerData>
+                  <TitleInnerData>
+                    {eurDefinedCalc24hPricePercent > 0
+                      ? `+${eurDefinedCalc24hPricePercent}`
+                      : eurDefinedCalc24hPricePercent}
+                    %
+                  </TitleInnerData>
                 </WidthInnerData>
               ) : (
                 <div> wait...</div>
@@ -153,18 +191,18 @@ function InfoChart() {
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h High</DataTitle>
-              {eurDefinedHighPrice ? <div>{eurDefinedHighPrice}</div> : <div> wait...</div>}
+              {eurDefinedHighPrice ? <TitleInnerData>{eurDefinedHighPrice}</TitleInnerData> : <div> wait...</div>}
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h Low</DataTitle>
-              {eurDefinedLowPrice ? <div>{eurDefinedLowPrice}</div> : <div> wait...</div>}
+              {eurDefinedLowPrice ? <TitleInnerData>{eurDefinedLowPrice}</TitleInnerData> : <div> wait...</div>}
             </InnerTopChartInfo>
           </ChartDiv>
         </TopChartInfo>
         <CandlestickChart />
-        <Position />
+        <Position initGameData={initGameData} />
       </LeftRight>
-      <LongShort />
+      <LongShort initGameData={initGameData} />
     </InfoMain>
   );
 }

@@ -1,10 +1,14 @@
 import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
 import { GasPrice } from "@cosmjs/stargate";
+import { useEffect } from "react";
+
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import { client } from "websocket";
+
 import BalanceContext from "../BalanceContext";
+import DepositModal from "../DepositModal";
 import Header from "../Header";
+import WithdrawModal from "../WithdrawModal";
 
 const BankWrapper = styled.div`
   display: flex;
@@ -455,6 +459,24 @@ const WithdrawContractDiv = styled.div`
     }
   }
 `;
+async function testnetInfo() {
+  const gasPrice = GasPrice.fromString("0.01uconst");
+  const offlineSigner = window.getOfflineSigner("constantine-2", gasPrice);
+
+  const accounts = await offlineSigner.getAccounts();
+  const testClient = await SigningArchwayClient.connectWithSigner(
+    "https://rpc.constantine-2.archway.tech",
+    offlineSigner,
+    {
+      gasPrice,
+      prefix: "archway",
+    }
+  );
+  const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+
+  console.log("client balance", clientBalance);
+}
+testnetInfo();
 
 function Swap() {
   const { balance, setBalance } = useContext(BalanceContext);
@@ -465,7 +487,11 @@ function Swap() {
   const [myBalance, isMyBalance] = useState("");
   const [myAddress, setMyAddress] = useState("");
   const [isLPBalance, setIsLPBalance] = useState("");
+  const [handleInputAmount, setHandleInputAmount] = useState("");
 
+  const [gasPrice, setGasPrice] = useState(null);
+  const [offlineSigner, setOfflineSigner] = useState(null);
+  const [isAccount, setIsAccount] = useState(null);
   const network = {
     chainId: "constantine-2",
     endpoint: "https://rpc.constantine-2.archway.tech",
@@ -473,7 +499,9 @@ function Swap() {
   };
 
   const ClickedIsOpen = () => {
+    console.log(depositIsOpen);
     setDepositIsOpen(!depositIsOpen);
+    console.log(depositIsOpen);
   };
   const ClickedDeposit = (event) => {
     setClickDeposit(true);
@@ -483,58 +511,72 @@ function Swap() {
     setClickDeposit(false);
     setClickWithdraw(true);
   };
-
-  const networkInfo = async () => {
-    const gasPrice = GasPrice.fromString("0.01uconst");
-    const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
-    const accounts = await offlineSigner.getAccounts();
-    const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
-      gasPrice,
-      prefix: network.prefix,
-    });
-    const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
-    isMyBalance(clientBalance.amount / 1000000);
-    setMyAddress(accounts[0].address);
-    console.log(myBalance);
+  const handleInput = (e) => {
+    setHandleInputAmount(e.target.value);
+    console.log(e.target.value);
   };
-  networkInfo();
 
-  const getBankPool = async () => {
-    const client = await ArchwayClient.connect(network.endpoint);
-    const msg = {
-      get_pool: {},
+  useEffect(() => {
+    const networkInfo = async () => {
+      const gasPrice = GasPrice.fromString("0.01uconst");
+      const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
+      setGasPrice(gasPrice);
+      setOfflineSigner(offlineSigner);
+
+      const accounts = await offlineSigner.getAccounts();
+      setIsAccount(accounts[0].address);
+      const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
+        gasPrice,
+        prefix: network.prefix,
+      });
+      const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+
+      isMyBalance(clientBalance.amount / 1000000);
+      setMyAddress(accounts[0].address);
+      console.log(myBalance);
     };
-    try {
-      const bankContract = process.env.REACT_APP_BANKCONTRACT_ADDRESS;
-      const result = await client.queryContractSmart(bankContract, msg);
-      console.log(result.balance);
-      setIsPoolBalance(result.balance / 1000000);
-      return result;
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  getBankPool();
+    networkInfo();
+  }, []);
 
-  console.log(myAddress);
-  //LP Pool balance
-  const getLPPool = async () => {
-    const client = await ArchwayClient.connect(network.endpoint);
-    const msg = {
-      balance: { address: myAddress },
+  useEffect(() => {
+    const getBankPool = async () => {
+      const client = await ArchwayClient.connect(network.endpoint);
+      const msg = {
+        get_pool: {},
+      };
+      try {
+        const bankContract = process.env.REACT_APP_BANKCONTRACT_ADDRESS;
+        const result = await client.queryContractSmart(bankContract, msg);
+        console.log(result.balance);
+        setIsPoolBalance(result.balance / 1000000);
+        return result;
+      } catch (err) {
+        console.log(err);
+      }
     };
-    try {
-      const result = await client.queryContractSmart(process.env.REACT_APP_LPCONTRACT_ADDRESS, msg);
-      console.log("getLPPool log", result);
-      setIsLPBalance(result.balance);
-      return result;
-    } catch (err) {
-      console.log("getLPPool err", err);
-    }
-  };
-  getLPPool();
 
-  const depositContract = async () => {};
+    console.log(myAddress);
+    // LP Pool balance
+    const getLPPool = async () => {
+      const client = await ArchwayClient.connect(network.endpoint);
+      const msg = {
+        balance: { address: myAddress },
+      };
+      try {
+        const result = await client.queryContractSmart(process.env.REACT_APP_LPCONTRACT_ADDRESS, msg);
+        console.log("getLPPool log", result);
+        setIsLPBalance(result.balance);
+        return result;
+      } catch (err) {
+        console.log("getLPPool err", err);
+      }
+    };
+
+    if (myAddress) {
+      getBankPool();
+      getLPPool();
+    }
+  }, [myAddress]);
 
   const DepositForm = () => {
     return (
@@ -557,40 +599,25 @@ function Swap() {
             </DepositAssetInner>
           </button>
         </DepositAsset>
-        {depositIsOpen && <ViewdepositModal />}
+        {/* {depositIsOpen && <ViewdepositModal />} */}
+        {depositIsOpen && (
+          <DepositModal
+            network={network}
+            myBalance={myBalance}
+            isMyBalance={isMyBalance}
+            depositIsOpen={depositIsOpen}
+            setDepositIsOpen={setDepositIsOpen}
+            gasPrice={gasPrice}
+            setGasPrice={setGasPrice}
+            offlineSigner={offlineSigner}
+            setOfflineSigner={setOfflineSigner}
+            isAccount={isAccount}
+            setIsAccount={setIsAccount}
+            setIsPoolBalance={setIsPoolBalance}
+            isPoolBalance={isPoolBalance}
+          />
+        )}
       </div>
-    );
-  };
-
-  const ViewdepositModal = () => {
-    return (
-      <DepositModalWrapper>
-        <DepositModalDiv>
-          <DepositModalTitle>
-            CONST<button onClick={ClickedIsOpen}>X</button>
-          </DepositModalTitle>
-          <div>
-            <DepositModalContent>
-              <div>Deposit</div>
-            </DepositModalContent>
-          </div>
-          <DepositModalInputTotal>
-            <DepositModalInputDiv>
-              <input type="number" placeholder="0.0"></input>
-              <DepositModalInputAmount>
-                balance: {sessionStorage.getItem("walletConnection") != null ? myBalance : "0"}
-              </DepositModalInputAmount>
-            </DepositModalInputDiv>
-          </DepositModalInputTotal>
-          <DepositModalOutputDiv>
-            <div>receive LP</div>
-            <div>0 Token</div>
-          </DepositModalOutputDiv>
-          <DepositContractDiv>
-            <button>Enter</button>
-          </DepositContractDiv>
-        </DepositModalDiv>
-      </DepositModalWrapper>
     );
   };
 
@@ -615,7 +642,23 @@ function Swap() {
             </WithdrawAssetInner>
           </button>
         </WithdrawAsset>
-        {depositIsOpen && <ViewWithdrawModal />}
+        {depositIsOpen && (
+          <WithdrawModal
+            depositIsOpen={depositIsOpen}
+            setDepositIsOpen={setDepositIsOpen}
+            isLPBalance={isLPBalance}
+            setIsLPBalance={setIsLPBalance}
+            network={network}
+            gasPrice={gasPrice}
+            setGasPrice={setGasPrice}
+            offlineSigner={offlineSigner}
+            setOfflineSigner={setOfflineSigner}
+            isAccount={isAccount}
+            setIsAccount={setIsAccount}
+            isPoolBalance={isPoolBalance}
+            setIsPoolBalance={setIsPoolBalance}
+          />
+        )}
       </div>
     );
   };
@@ -667,7 +710,7 @@ function Swap() {
         <BankTotalPool>
           <BankTotalPoolDiv>
             <BankTotalPoolInner>Total Pool Balance (CONST)</BankTotalPoolInner>
-            <BankTotalPoolData>{isPoolBalance}</BankTotalPoolData>
+            <BankTotalPoolData>{isPoolBalance ? isPoolBalance : "Loading..."}</BankTotalPoolData>
           </BankTotalPoolDiv>
           <BankTotalPoolDiv>
             <BankTotalPoolInner>Balance in Play</BankTotalPoolInner>
