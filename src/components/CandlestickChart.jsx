@@ -12,7 +12,7 @@ const ChartDiv = styled.div`
   box-sizing: border-box;
 `;
 
-const CandlestickChart = () => {
+const CandlestickChart = ({ chart }) => {
   const [options, setOptions] = useState({
     chart: {
       background: "#181818",
@@ -182,7 +182,9 @@ const CandlestickChart = () => {
     const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
     const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
     const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
-    const tooltipTitle = moment(w.globals.seriesX[0][dataPointIndex]).format("YYYY-MM-DD HH:mm");
+    const tooltipTitle = moment(w.globals.seriesX[0][dataPointIndex]).format(
+      "YYYY-MM-DD HH:mm"
+    );
     return `
       <div>Open: ${o.toFixed(2)}</div>
       <div>High: ${h.toFixed(2)}</div>

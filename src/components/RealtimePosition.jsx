@@ -83,25 +83,31 @@ const LoadingDiv = styled.div`
   align-items: center;
 `;
 
-function RealtimePosition({ height, initGameData }) {
+function RealtimePosition({ height, bettingList }) {
   return (
     <div>
       <TotalDiv>
         <Titlediv>Realtime Trade</Titlediv>
         <HeaderDiv>
           <HeaderDivLeft>Price(USD)</HeaderDivLeft>
-          <HeaderDivRight style={{ textAlign: "right" }}>Amount(CONST)</HeaderDivRight>
+          <HeaderDivRight style={{ textAlign: "right" }}>
+            Amount(CONST)
+          </HeaderDivRight>
           <HeaderDivRight>Position</HeaderDivRight>
         </HeaderDiv>
         <MainDiv style={{ height: height }}>
           <Bodydiv>
-            {initGameData ? (
-              initGameData.map((item, index) => {
+            {bettingList ? (
+              bettingList.map((item, index) => {
                 return (
                   <Bodydiv2 key={index}>
                     <BodydivLeft>${item.basePrice.toFixed(5)}</BodydivLeft>
                     <BodydivCenter>{item.amount / 1000000}</BodydivCenter>
-                    <BodydivRight style={{ color: item.position == "Long" ? "#0ecb82" : "#f7465d" }}>
+                    <BodydivRight
+                      style={{
+                        color: item.position == "Long" ? "#0ecb82" : "#f7465d",
+                      }}
+                    >
                       {item.position}
                     </BodydivRight>
                   </Bodydiv2>

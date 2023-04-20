@@ -96,11 +96,12 @@ const OutputAmount = styled.div`
   margin: 10px;
 `;
 
-function LongShort({ initGameData }) {
+function LongShort({ bettingList }) {
   const { isConnected } = useContext(WalletConnectionContext);
   const { balance, setBalance } = useContext(BalanceContext);
   const [inputValue, setInPutValue] = useState("");
   const [clickValue, setClickValue] = useState("Long");
+  const [duration, setDuration] = useState(30);
   const [isShortClick, setIsShortClick] = useState(false);
   const [isLongClick, setIsLongClick] = useState(true);
   const [rightHeight, setRightHeight] = useState(window.innerHeight * 0.45);
@@ -116,11 +117,18 @@ function LongShort({ initGameData }) {
     const gasPrice = GasPrice.fromString("0.01uconst");
     const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
     const accounts = await offlineSigner.getAccounts();
-    const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
-      gasPrice,
-      prefix: network.prefix,
-    });
-    const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+    const testClient = await SigningArchwayClient.connectWithSigner(
+      network.endpoint,
+      offlineSigner,
+      {
+        gasPrice,
+        prefix: network.prefix,
+      }
+    );
+    const clientBalance = await testClient.getBalance(
+      accounts[0].address,
+      "uconst"
+    );
     setLocalGetBalance(clientBalance.amount);
   };
   useEffect(() => {
@@ -194,35 +202,72 @@ function LongShort({ initGameData }) {
       </BtnTotal>
       <InputDiv>
         <InputPayBalnace>
-          {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} Const</div> : <div>Pay: 0.00 Const</div>}
+          {inputValue ? (
+            <div>Pay: {Math.floor(inputValue * 100) / 100} Const</div>
+          ) : (
+            <div>Pay: 0.00 Const</div>
+          )}
 
           <div>
-            Balance <div> {localGetBalance ? parseFloat(localGetBalance / 1000000).toFixed(6) : "0.000000"} Const</div>
+            Balance{" "}
+            <div>
+              {" "}
+              {localGetBalance
+                ? parseFloat(localGetBalance / 1000000).toFixed(6)
+                : "0.000000"}{" "}
+              Const
+            </div>
           </div>
         </InputPayBalnace>
-        <InputAmount type="number" placeholder="0.0" value={inputValue} onChange={handleInputchange} />
+        <InputAmount
+          type="number"
+          placeholder="0.0"
+          value={inputValue}
+          onChange={handleInputchange}
+        />
       </InputDiv>
       <OutputDiv>
         <InputPayBalnace>
           <div>{clickValue}</div>
-          <div>5min x1.96</div>
+          <div>x1.97</div>
         </InputPayBalnace>
         <OutputAmount>
           {inputValue ? (
-            <div>Win: {Math.floor(inputValue * 1.96 * 1000000) / 1000000} Const</div>
+            <div>
+              Win: {Math.floor(inputValue * 1.97 * 1000000) / 1000000} Const
+            </div>
           ) : (
             <div>Win: 0.00 Const</div>
           )}
         </OutputAmount>
       </OutputDiv>
+      <button
+        onClick={() => {
+          setDuration(30);
+        }}
+      >
+        30
+      </button>
+      <button
+        onClick={() => {
+          setDuration(50);
+        }}
+      >
+        {" "}
+        50
+      </button>
       <SmartContractButton
         betType={clickValue}
         betAmount={inputValue}
         localGetBalance={localGetBalance}
+        duration={duration}
         disabled={!sessionStorage.getItem("walletConnection")}
       />
       <div>
-        <RealtimePosition height={`${rightHeight - 195}px`} initGameData={initGameData} />
+        <RealtimePosition
+          height={`${rightHeight - 195}px`}
+          bettingList={bettingList}
+        />
       </div>
     </RightTotalInfo>
   );

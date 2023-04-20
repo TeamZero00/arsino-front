@@ -6,6 +6,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { useContext } from "react";
 import { useEffect } from "react";
+import config from "../config";
 
 dotenv.config();
 
@@ -30,7 +31,13 @@ const ExecuteButton = styled.button`
   }
 `;
 
-const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance, disabled }) => {
+const SmartContractButton = ({
+  betAmount,
+  betType: positionType,
+  localGetBalance,
+  duration,
+  disabled,
+}) => {
   const { setBalance } = useContext(BalanceContext);
   const [count, setCount] = useState(0);
   const executeBalance = localGetBalance;
@@ -51,16 +58,19 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
       const executeFee = calculateFee(700_000, gasPrice);
       const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
       const accounts = await offlineSigner.getAccounts();
-      const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
-        gasPrice,
-        prefix: network.prefix,
-      });
-      const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
-      const duration = 50;
+      const testClient = await SigningArchwayClient.connectWithSigner(
+        network.endpoint,
+        offlineSigner,
+        {
+          gasPrice,
+          prefix: network.prefix,
+        }
+      );
+
       const position = positionType.toLowerCase();
 
       const bettingAmount = betAmount;
-      const executeContractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+      const executeContractAddress = config.gameContarct;
       const msg = {
         betting: {
           position,
@@ -68,7 +78,6 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
         },
       };
 
-      console.log("hi CA :", process.env.REACT_APP_CONTRACT_ADDRESS);
       const { transactionHash, height, logs } = await testClient.execute(
         accounts[0].address,
         executeContractAddress,
@@ -83,7 +92,10 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
           },
         ]
       );
-      const updatedClientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+      const updatedClientBalance = await testClient.getBalance(
+        accounts[0].address,
+        "uconst"
+      );
       setBalance(updatedClientBalance);
       updateAfterBalance();
 
