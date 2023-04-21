@@ -49,15 +49,13 @@ const PositionInfo = styled.div`
 const PositionInfoData = styled.div`
   color: #ffffff;
   display: flex;
-
+  font-size: 14px;
   justify-content: center;
   align-items: center;
   width: 100%;
 `;
 const fetchHistory = async (address) => {
-  const { data } = await axios.get(
-    `http://${config.serverEndpoint}/bet_history/${address}`
-  );
+  const { data } = await axios.get(`http://${config.serverEndpoint}/bet_history/${address}`);
 
   return data;
 };
@@ -77,9 +75,7 @@ function UserBettingList({ bettingList, winner }) {
               },
             },
           },
-        } = await axios.get(
-          `https://rpc.constantine-2.archway.tech/commit?height=${item.startHeight}`
-        );
+        } = await axios.get(`https://rpc.constantine-2.archway.tech/commit?height=${item.startHeight}`);
         return { ...item, time };
       })
     );
@@ -146,8 +142,8 @@ function UserBettingList({ bettingList, winner }) {
     <PositionTotal>
       <PositionTopInfo>
         <PositionTopInfoDiv>Date</PositionTopInfoDiv>
-        <PositionTopInfoDiv>startHeight</PositionTopInfoDiv>
-        <PositionTopInfoDiv>targetHeight</PositionTopInfoDiv>
+        {/* <PositionTopInfoDiv>startHeight</PositionTopInfoDiv>
+        <PositionTopInfoDiv>targetHeight</PositionTopInfoDiv> */}
         <PositionTopInfoDiv>Position</PositionTopInfoDiv>
         <PositionTopInfoDiv>Amount(CONST)</PositionTopInfoDiv>
         <PositionTopInfoDiv>Status</PositionTopInfoDiv>
@@ -155,37 +151,28 @@ function UserBettingList({ bettingList, winner }) {
         <PositionTopInfoDiv>RoundPrice</PositionTopInfoDiv>
         <PositionTopInfoDiv>WinAmount</PositionTopInfoDiv>
       </PositionTopInfo>
-      {userHistory.length === 0 ? (
-        <div></div>
+      {userHistory.length == 0 ? (
+        <div>wait</div>
       ) : (
         userHistory.map((history) => {
-          const {
-            position,
-            time,
-            amount,
-            status,
-            winAmount,
-            roundPrice,
-            basePrice,
-            startHeight,
-            targetHeight,
-          } = history;
+          const { position, time, amount, status, winAmount, roundPrice, basePrice, startHeight, targetHeight } =
+            history;
 
           return (
             <PositionInfo key={history.id}>
               <PositionInfoData>{formatDate(time)}</PositionInfoData>
-              <PositionInfoData>{startHeight}</PositionInfoData>
-              <PositionInfoData>{targetHeight}</PositionInfoData>
-              <PositionInfoData
-                style={{ color: position === "Long" ? "green" : "red" }}
-              >
+              {/* <PositionInfoData>{startHeight}</PositionInfoData>
+              <PositionInfoData>{targetHeight}</PositionInfoData> */}
+              <PositionInfoData style={{ color: position == "Long" ? "#0ecb82" : "#f7465d" }}>
                 {position}
               </PositionInfoData>
-              <PositionInfoData>{amount}</PositionInfoData>
+              <PositionInfoData>{amount / 1000000}</PositionInfoData>
               <PositionInfoData>{status}</PositionInfoData>
-              <PositionInfoData>{basePrice}</PositionInfoData>
-              <PositionInfoData>{roundPrice}</PositionInfoData>
-              <PositionInfoData>{winAmount}</PositionInfoData>
+              <PositionInfoData>{basePrice.toFixed(5)}</PositionInfoData>
+              <PositionInfoData>{roundPrice.toFixed(5)}</PositionInfoData>
+              <PositionInfoData style={{ color: status == "Lose" ? "#555555" : "none" }}>
+                {winAmount / 1000000}
+              </PositionInfoData>
             </PositionInfo>
           );
         })

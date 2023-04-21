@@ -545,7 +545,7 @@ function Swap() {
         get_pool: {},
       };
       try {
-        const bankContract = process.env.REACT_APP_BANKCONTRACT_ADDRESS;
+        const bankContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
         const result = await client.queryContractSmart(bankContract, msg);
         console.log(result.balance);
         setIsPoolBalance(result.balance / 1000000);
@@ -555,7 +555,6 @@ function Swap() {
       }
     };
 
-    console.log(myAddress);
     // LP Pool balance
     const getLPPool = async () => {
       const client = await ArchwayClient.connect(network.endpoint);
@@ -563,7 +562,7 @@ function Swap() {
         balance: { address: myAddress },
       };
       try {
-        const result = await client.queryContractSmart(process.env.REACT_APP_LPCONTRACT_ADDRESS, msg);
+        const result = await client.queryContractSmart(process.env.REACT_APP_LP_CONTRACT_ADDRESS, msg);
         console.log("getLPPool log", result);
         setIsLPBalance(result.balance);
         return result;
@@ -577,7 +576,8 @@ function Swap() {
       getLPPool();
     }
   }, [myAddress]);
-
+  console.log("myAddress", myAddress);
+  console.log("isPoolBalance", isPoolBalance);
   const DepositForm = () => {
     return (
       <div>

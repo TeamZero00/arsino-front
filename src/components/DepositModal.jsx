@@ -164,7 +164,7 @@ function DepositModal(props) {
         const getTotalMsg = {
           total_supply: {},
         };
-        const totalResult = await client.queryContractSmart(process.env.REACT_APP_LPCONTRACT_ADDRESS, getTotalMsg);
+        const totalResult = await client.queryContractSmart(process.env.REACT_APP_LP_CONTRACT_ADDRESS, getTotalMsg);
 
         isGetTotalLp(totalResult);
         console.log("getTotalSupply", getTotalLP);
@@ -179,7 +179,7 @@ function DepositModal(props) {
       get_pool: {},
     };
     try {
-      const bankContract = process.env.REACT_APP_BANKCONTRACT_ADDRESS;
+      const bankContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
       const result = await client.queryContractSmart(bankContract, getPoolMsg);
       setIsReceiveLP(result.balance);
       console.log("get Pool Balance", isReceiveLP);
@@ -194,11 +194,12 @@ function DepositModal(props) {
       gasPrice,
       prefix: network.prefix,
     });
-    const executeContract = process.env.REACT_APP_BANKCONTRACT_ADDRESS;
+    const executeContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
     try {
       const msg = {
         deposit: {},
       };
+      console.log(offlineSigner);
       const { height, transactionHash, gasUsed, logs } = await signer.execute(
         isAccount,
         executeContract,

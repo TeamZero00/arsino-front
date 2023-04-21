@@ -1,6 +1,9 @@
 import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
 import { useState } from "react";
 import styled from "styled-components";
+
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+
 const WithdrawModalWrapper = styled.div`
   position: fixed;
   top: 0;
@@ -129,7 +132,7 @@ const WithdrawContractDiv = styled.div`
 function WithdrawModal({
   isAccount,
   gasPrice,
-  offlineSignter,
+  offlineSigner,
   network,
   depositIsOpen,
   setDepositIsOpen,
@@ -159,7 +162,7 @@ function WithdrawModal({
         const getTotalMsg = {
           total_supply: {},
         };
-        const totalResult = await client.queryContractSmart(process.env.REACT_APP_LPCONTRACT_ADDRESS, getTotalMsg);
+        const totalResult = await client.queryContractSmart(process.env.REACT_APP_LP_CONTRACT_ADDRESS, getTotalMsg);
 
         setIsTotalLP(totalResult);
         console.log("getTotal", isTotalLP);
@@ -172,21 +175,19 @@ function WithdrawModal({
   };
   getTotalLPBalance();
   console.log("total LP", isTotalLP);
+  console.log("isAccount", isAccount);
+  console.log("netwrok", offlineSigner);
 
-  const getPoolBalance = async () => {
-    console.log("poolbalance", isPoolBalance);
-    console.log("isLP ", isLP, "isTotal LP", isTotalLP);
-  };
-  getPoolBalance();
   const withdrawContract = async () => {
-    const signer = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSignter, {
+    const signer = await SigningCosmWasmClient.connectWithSigner(network.endpoint, offlineSigner, {
       gasPrice,
       prefix: network.prefix,
     });
+
     try {
       const allowanceMsg = {
         increase_allowance: {
-          spender: process.env.REACT_APP_BANKCONTRACT_ADDRESS,
+          spender: process.env.REACT_APP_BANK_CONTRACT_ADDRESS,
           amount: isLP,
           // not defined. what is this data????????????????????????????????????????????
           //   expires: {
@@ -197,16 +198,37 @@ function WithdrawModal({
       const withdrawMsg = {
         withdraw: {},
       };
-      const result = await signer.executeMultiMsg(
-        isAccount,
-        [
-          { contractAddress: process.env.REACT_APP_LPCONTRACT_ADDRESS, msg: allowanceMsg },
-          { contractAddress: process.env.REACT_APP_BANKCONTRACT_ADDRESS, mgs: withdrawMsg },
-        ],
-        "auto",
-        undefined
-      );
-      console.log(result);
+      const messages = [
+        {
+          contractAddress: process.env.REACT_APP_LP_CONTRACT_ADDRESS,
+          msg: allowanceMsg,
+        },
+        {
+          contractAddress: process.env.REACT_APP_BANK_CONTRACT_ADDRESS,
+          msg: withdrawMsg,
+        },
+      ];
+
+      // const allowanceResult = await signer.execute(
+      //   isAccount,
+      //   process.env.REACT_APP_LP_CONTRACT_ADDRESS,
+      //   allowanceMsg,
+      //   "auto",
+      //   undefined
+      // );
+      // console.log(allowanceResult);
+
+      // // Execute withdraw transaction
+      // const withdrawResult = await signer.execute(
+      //   isAccount,
+      //   process.env.REACT_APP_BANK_CONTRACT_ADDRESS,
+      //   withdrawMsg,
+      //   "auto",
+      //   undefined
+      // );
+      // console.log(withdrawResult);
+      const executeMulti = await signer.executeMultiple(isAccount, messages, "auto", undefined);
+      console.log(executeMulti);
     } catch (err) {
       console.log(err);
     }
@@ -233,7 +255,9 @@ function WithdrawModal({
           <div>{isLP ? (isLP / isTotalLP) * isPoolBalance : "0"}</div>
         </WithdrawModalOutputDiv>
         <WithdrawContractDiv>
-          <button disabled={disabled}>{!disabled ? "Enter" : "Connect Wallet"}</button>
+          <button onClick={withdrawContract} disabled={disabled}>
+            {!disabled ? "Enter" : "Connect Wallet"}
+          </button>
         </WithdrawContractDiv>
       </WithdrawModalDiv>
     </WithdrawModalWrapper>
