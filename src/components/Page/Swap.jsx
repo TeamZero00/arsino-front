@@ -638,7 +638,7 @@ function Swap() {
               <div>AMG (LP)</div>
             </WithdrawAssetInner>
             <WithdrawAssetInner>
-              <div>{sessionStorage.getItem("walletConnection") != null ? isLPBalance : "0"}</div>
+              <div>{sessionStorage.getItem("walletConnection") != null ? isLPBalance / 1000000 : "0"}</div>
             </WithdrawAssetInner>
           </button>
         </WithdrawAsset>

@@ -209,7 +209,7 @@ function DepositModal(props) {
         [
           {
             denom: "uconst",
-            amount: handleInputAmount,
+            amount: (handleInputAmount * 1000000).toString(),
           },
         ]
       );
@@ -255,7 +255,7 @@ function DepositModal(props) {
         </DepositModalInputTotal>
         <DepositModalOutputDiv>
           <div>receive LP</div>
-          <div>{handleInputAmount ? (handleInputAmount / isReceiveLP) * getTotalLP : "0"} Token</div>
+          <div>{handleInputAmount ? ((handleInputAmount / isReceiveLP) * getTotalLP).toFixed(6) : "0"} Token</div>
         </DepositModalOutputDiv>
         <DepositContractDiv>
           <button onClick={depositContract} disabled={disabled}>

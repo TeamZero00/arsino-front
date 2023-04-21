@@ -188,7 +188,7 @@ function WithdrawModal({
       const allowanceMsg = {
         increase_allowance: {
           spender: process.env.REACT_APP_BANK_CONTRACT_ADDRESS,
-          amount: isLP,
+          amount: (isLP * 1000000).toString(),
           // not defined. what is this data????????????????????????????????????????????
           //   expires: {
           //     at_height: expires,
@@ -247,12 +247,14 @@ function WithdrawModal({
         <WithdrawModalInputTotal>
           <WithdrawModalInputDiv>
             <input type="number" placeholder="0.0" value={isLP} onChange={inputLPBalance}></input>
-            <WithdrawModalInputAmount>LP balance: {isLPBalance != null ? isLPBalance : "0"}</WithdrawModalInputAmount>
+            <WithdrawModalInputAmount>
+              LP balance: {isLPBalance != null ? isLPBalance / 1000000 : "0"}
+            </WithdrawModalInputAmount>
           </WithdrawModalInputDiv>
         </WithdrawModalInputTotal>
         <WithdrawModalOutputDiv>
           <div>receive CONST</div>
-          <div>{isLP ? (isLP / isTotalLP) * isPoolBalance : "0"}</div>
+          <div>{isLP ? ((isLP / isTotalLP) * isPoolBalance * 1000000).toFixed(6) : "0"}</div>
         </WithdrawModalOutputDiv>
         <WithdrawContractDiv>
           <button onClick={withdrawContract} disabled={disabled}>
