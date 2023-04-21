@@ -84,6 +84,11 @@ const LoadingDiv = styled.div`
 `;
 
 function RealtimePosition({ height, bettingList }) {
+  console.log(bettingList);
+  const currentBettingList = bettingList.filter((betting) => {
+    return betting.status === "Pending";
+  });
+  console.log("current", currentBettingList);
   return (
     <div>
       <TotalDiv>
@@ -97,8 +102,8 @@ function RealtimePosition({ height, bettingList }) {
         </HeaderDiv>
         <MainDiv style={{ height: height }}>
           <Bodydiv>
-            {bettingList ? (
-              bettingList.map((item, index) => {
+            {currentBettingList ? (
+              currentBettingList.map((item, index) => {
                 return (
                   <Bodydiv2 key={index}>
                     <BodydivLeft>${item.basePrice.toFixed(5)}</BodydivLeft>
