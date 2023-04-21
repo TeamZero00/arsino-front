@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 const connectWallet = async (evnet, chainInfo, { getInfo, setBalance }) => {
@@ -23,17 +24,26 @@ const connectWallet = async (evnet, chainInfo, { getInfo, setBalance }) => {
   // address & public key 페어 배열 리턴
   const accounts = await offlineSigner.getAccounts();
   // SigningCosmWasmClient 생성
-  const client = await SigningCosmWasmClient.connectWithSigner(chainInfo.rpc, offlineSigner);
+  const signer = await SigningCosmWasmClient.connectWithSigner(
+    chainInfo.rpc,
+    offlineSigner
+  );
   // 해당 주소의 balance 가져오기
-  const balance = await client.getBalance(accounts[0].address, chainInfo.stakeCurrency.coinMinimalDenom);
-  const walletName = await window.keplr.getKey(chainInfo.chainId);
+  const balance = await signer.getBalance(
+    accounts[0].address,
+    chainInfo.stakeCurrency.coinMinimalDenom
+  );
+
+  const name = await window.keplr.getKey(chainInfo.chainId);
   // 부모 컴포넌트로 값을 넘겨주기 위한 함수
 
-  getInfo(client, accounts[0].address, balance, chainInfo.chainId, walletName);
+  getInfo(signer, accounts[0].address, balance, chainInfo.chainId, name);
 
-  // console.log(offlineSigner);
-  // console.log(balance);
-  // console.log(accounts[0].address);
+  return {
+    name,
+    balance,
+    signer,
+  };
 };
 
 export default connectWallet;

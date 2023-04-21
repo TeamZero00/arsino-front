@@ -39,7 +39,7 @@ const SmartContractButton = ({
   disabled,
 }) => {
   const { setBalance } = useContext(BalanceContext);
-  const [count, setCount] = useState(0);
+
   const executeBalance = localGetBalance;
   const [afterBalance, setAfterBalance] = useState(0);
 

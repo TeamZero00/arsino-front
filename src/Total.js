@@ -19,9 +19,8 @@ function Total() {
     winners: [],
   });
   const [chart, setChart] = useState([]);
-
+  const [setting, setSetting] = useState(null);
   useEffect(() => {
-    // eslint-disable-next-line no-undef
     const ws = new WebSocket("ws://66.42.38.167:8080");
     setSocket(ws);
     // DB WS
@@ -57,6 +56,7 @@ function Total() {
           setBettingList(game);
           setPool(poolBalance);
           setPrice(price);
+          setSetting(true);
           break;
         }
         default:
@@ -67,6 +67,11 @@ function Total() {
       ws.close();
     };
   }, []);
+
+  if (!setting) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <WalletConnectionContext.Provider value={{ isConnected, setIsConnected }}>

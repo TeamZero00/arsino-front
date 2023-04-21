@@ -1,10 +1,11 @@
 import axios from "axios";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import CandlestickChart from "./CandlestickChart";
 import LongShort from "./LongShort";
 import Position from "./UserBettingList";
 import UserBettingList from "./UserBettingList";
+import { WalletContext } from "../App";
 // import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 const InfoMain = styled.div`
@@ -69,6 +70,7 @@ function InfoChart({ isConnected, price, pool, bettingList, winner, chart }) {
     current: null,
     previous: null,
   });
+
   const getColor = () => {
     if (eurInfo.previous && eurInfo.current > eurInfo.previous) {
       return "#0ecb82";
@@ -79,14 +81,23 @@ function InfoChart({ isConnected, price, pool, bettingList, winner, chart }) {
     }
   };
   const {
-    prices: { before24HourPrice = null, nowPrice = null, highPrice = null, lowPrice = null } = {},
+    prices: {
+      before24HourPrice = null,
+      nowPrice = null,
+      highPrice = null,
+      lowPrice = null,
+    } = {},
     height = null,
   } = price || {};
   return (
     <InfoMain>
       <LeftRight>
         <TopChartInfo>
-          {eurInfo ? <TitleInner>EUR/USD</TitleInner> : <TitleInner>Loading...</TitleInner>}
+          {eurInfo ? (
+            <TitleInner>EUR/USD</TitleInner>
+          ) : (
+            <TitleInner>Loading...</TitleInner>
+          )}
           <ChartDiv>
             <InnerTopChartInfo>
               <WidthInnerData
@@ -94,7 +105,11 @@ function InfoChart({ isConnected, price, pool, bettingList, winner, chart }) {
                   color: getColor(),
                 }}
               >
-                {nowPrice !== null ? <div>${Number(nowPrice).toFixed(5)}</div> : <div>wait..</div>}
+                {nowPrice !== null ? (
+                  <div>${Number(nowPrice).toFixed(5)}</div>
+                ) : (
+                  <div>wait..</div>
+                )}
               </WidthInnerData>
             </InnerTopChartInfo>
             <InnerTopChartInfo>
@@ -102,14 +117,23 @@ function InfoChart({ isConnected, price, pool, bettingList, winner, chart }) {
               {before24HourPrice ? (
                 <WidthInnerData
                   style={{
-                    color: nowPrice - before24HourPrice > 0 ? "#0ecb82" : "#f7465d",
+                    color:
+                      nowPrice - before24HourPrice > 0 ? "#0ecb82" : "#f7465d",
                   }}
                 >
-                  <TitleInnerData>{(nowPrice - before24HourPrice).toFixed(5)}</TitleInnerData>
+                  <TitleInnerData>
+                    {(nowPrice - before24HourPrice).toFixed(5)}
+                  </TitleInnerData>
                   <TitleInnerData>
                     {nowPrice - before24HourPrice > 0
-                      ? ` +${(((nowPrice - before24HourPrice) / before24HourPrice) * 100).toFixed(3)}`
-                      : ` -${(((nowPrice - before24HourPrice) / before24HourPrice) * 100).toFixed(3)}`}
+                      ? ` +${(
+                          ((nowPrice - before24HourPrice) / before24HourPrice) *
+                          100
+                        ).toFixed(3)}`
+                      : ` -${(
+                          ((nowPrice - before24HourPrice) / before24HourPrice) *
+                          100
+                        ).toFixed(3)}`}
                     %
                   </TitleInnerData>
                 </WidthInnerData>
@@ -119,15 +143,27 @@ function InfoChart({ isConnected, price, pool, bettingList, winner, chart }) {
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h High</DataTitle>
-              {highPrice ? <TitleInnerData>{highPrice}</TitleInnerData> : <div> wait...</div>}
+              {highPrice ? (
+                <TitleInnerData>{highPrice}</TitleInnerData>
+              ) : (
+                <div> wait...</div>
+              )}
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>24h Low</DataTitle>
-              {lowPrice ? <TitleInnerData>{lowPrice}</TitleInnerData> : <div> wait...</div>}
+              {lowPrice ? (
+                <TitleInnerData>{lowPrice}</TitleInnerData>
+              ) : (
+                <div> wait...</div>
+              )}
             </InnerTopChartInfo>
             <InnerTopChartInfo>
               <DataTitle>Now height</DataTitle>
-              {height ? <TitleInnerData>{height}</TitleInnerData> : <div> wait...</div>}
+              {height ? (
+                <TitleInnerData>{height}</TitleInnerData>
+              ) : (
+                <div> wait...</div>
+              )}
             </InnerTopChartInfo>
           </ChartDiv>
         </TopChartInfo>

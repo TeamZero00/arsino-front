@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useContext, useState, useEffect } from "react";
 import styled from "styled-components";
 import connectWallet from "../wallet/connect";
@@ -5,9 +7,10 @@ import networkInfo from "../wallet/network_info";
 import BalanceContext from "./BalanceContext";
 import { FiExternalLink, FiCopy } from "react-icons/fi";
 import { Link, Route, useLocation } from "react-router-dom";
-import WalletConnectionContext from "../WalletConnectionContext";
+import { WalletContext } from "../App";
 import dotenv from "dotenv";
 import Swap from "./Page/Swap";
+import WalletConnectionContext from "../WalletConnectionContext";
 dotenv.config();
 
 const HeaderDiv = styled.div`
@@ -195,6 +198,8 @@ const FaucetBtn = styled.button`
 `;
 function Header() {
   const { balance, setBalance } = useContext(BalanceContext);
+  const { wallet, setWallet } = useContext(WalletContext);
+  console.log(wallet);
   // connectWallet에서 받아올 값
   const [client, setClient] = useState();
   const [address, setAddress] = useState();
@@ -245,7 +250,13 @@ function Header() {
     const savedChainId = sessionStorage.getItem("chainId");
     const savedWalletName = JSON.parse(sessionStorage.getItem("walletName"));
 
-    if (savedClient && savedAddress && savedBalance && savedChainId && savedWalletName) {
+    if (
+      savedClient &&
+      savedAddress &&
+      savedBalance &&
+      savedChainId &&
+      savedWalletName
+    ) {
       setClient(savedClient);
       setAddress(savedAddress);
       setBalance(savedBalance);
@@ -256,6 +267,7 @@ function Header() {
 
   const Modal = ({ onClick }) => {
     const [isOpen, setIsOpen] = useState(false);
+
     const toggleModal = () => {
       setIsOpen(!isOpen);
     };
@@ -282,7 +294,11 @@ function Header() {
               </ModalMainDiv>
               <DownBtnDiv>
                 <CloseButton
-                  onClick={() => window.open(`https://testnet.mintscan.io/archway-testnet/account/${address}`)}
+                  onClick={() =>
+                    window.open(
+                      `https://testnet.mintscan.io/archway-testnet/account/${address}`
+                    )
+                  }
                 >
                   Explorer <FiExternalLink />
                 </CloseButton>
@@ -292,13 +308,15 @@ function Header() {
           </ModalWrapper>
         )}
         <RightConnectedWallet type="button" onClick={toggleModal}>
-          {walletName.name}
+          {wallet.name.name}
         </RightConnectedWallet>
       </>
     );
   };
   // connectWallet으로 가져온 정보를 초기화
   const disconnect = (event) => {
+    setWallet(null);
+
     setClient();
     setChainId();
     setAddress();
@@ -328,7 +346,19 @@ function Header() {
       return (
         <RightWalletConnect
           type="button"
-          onClick={(event) => connectWallet(event, networkInfo[id], { getInfo })}
+          onClick={async (event) => {
+            const { name, signer, balance } = await connectWallet(
+              event,
+              networkInfo[id],
+              { getInfo }
+            );
+
+            setWallet({
+              name,
+              balance,
+              signer,
+            });
+          }}
           className="connect-btn"
         >
           Connect Wallet
@@ -344,7 +374,10 @@ function Header() {
         <LeftHeaderLink>
           <Link
             to={"/trade"}
-            style={{ textDecoration: "none", color: isTradeClicked ? "#ff4d00" : "none" }}
+            style={{
+              textDecoration: "none",
+              color: isTradeClicked ? "#ff4d00" : "none",
+            }}
             onClick={TradeLinkClicked}
           >
             Trade
@@ -353,7 +386,10 @@ function Header() {
         <LeftHeaderLink>
           <Link
             to={"/bank"}
-            style={{ textDecoration: "none", color: isBankClicked ? "#ff4d00" : "none" }}
+            style={{
+              textDecoration: "none",
+              color: isBankClicked ? "#ff4d00" : "none",
+            }}
             onClick={BankLinkClicked}
           >
             Bank
@@ -362,7 +398,11 @@ function Header() {
       </LeftHeaderNavi>
 
       <RightHeaderNavi>
-        <FaucetBtn onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}>Faucet</FaucetBtn>
+        <FaucetBtn
+          onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}
+        >
+          Faucet
+        </FaucetBtn>
         <div>{renderBtn()}</div>
       </RightHeaderNavi>
     </HeaderDiv>
