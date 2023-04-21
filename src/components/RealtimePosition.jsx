@@ -110,7 +110,7 @@ function RealtimePosition({ height, bettingList }) {
                     <BodydivCenter>{item.amount / 1000000}</BodydivCenter>
                     <BodydivRight
                       style={{
-                        color: item.position == "Long" ? "#0ecb82" : "#f7465d",
+                        color: item.position === "Long" ? "#0ecb82" : "#f7465d",
                       }}
                     >
                       {item.position}

@@ -74,17 +74,21 @@ function Total() {
 
   return (
     <div>
-      <WalletConnectionContext.Provider value={{ isConnected, setIsConnected }}>
-        <Header />
-        <InfoChart
-          isConnected={isConnected}
-          price={price}
-          pool={pool}
-          bettingList={bettingList}
-          winner={winner}
-          chart={chart}
-        />
-      </WalletConnectionContext.Provider>
+      {setting && (
+        <WalletConnectionContext.Provider
+          value={{ isConnected, setIsConnected }}
+        >
+          <Header />
+          <InfoChart
+            isConnected={isConnected}
+            price={price}
+            pool={pool}
+            bettingList={bettingList}
+            winner={winner}
+            chart={chart}
+          />
+        </WalletConnectionContext.Provider>
+      )}
     </div>
   );
 }
