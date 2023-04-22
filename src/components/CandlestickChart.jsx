@@ -12,7 +12,7 @@ const ChartDiv = styled.div`
   box-sizing: border-box;
 `;
 
-const CandlestickChart = ({ chart }) => {
+const CandlestickChart = ({ chart, newChart }) => {
   const [options, setOptions] = useState({
     chart: {
       background: "#181818",
@@ -41,7 +41,7 @@ const CandlestickChart = ({ chart }) => {
       },
     },
     title: {
-      text: "BTC Price",
+      text: "EUR Price",
       align: "left",
       style: {
         color: "#777777",
@@ -78,6 +78,8 @@ const CandlestickChart = ({ chart }) => {
           colors: "#777777",
         },
       },
+      min: undefined,
+      max: undefined,
     },
   });
   const [chartHeight, setChartHeight] = useState(window.innerHeight * 0.45);
@@ -91,107 +93,120 @@ const CandlestickChart = ({ chart }) => {
       window.removeEventListener("resize", updateChartHeight);
     };
   }, []);
+
   const [series, setSeries] = useState([{ data: [] }]);
-
+  const sortWebsocketUrl = "ws://66.42.38.167:8080";
+  const sortChart = chart.sort((a, b) => {
+    return a.id - b.id;
+  });
   useEffect(() => {
-    const symbol = "btcusdt";
-    const interval = "1m";
-    const websocketUrl = `wss://stream.binance.com:9443/ws/${symbol}@kline_${interval}`;
-
-    let ws = null;
-    let isMounted = true;
-
     const fetchChartData = async () => {
-      const response = await axios.get(
-        `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${interval}&limit=180`
-      );
-      const klines = response.data;
-      const data = klines.map((kline) => {
-        const timestamp = kline[0];
-        const open = parseFloat(kline[1]);
-        const high = parseFloat(kline[2]);
-        const low = parseFloat(kline[3]);
-        const close = parseFloat(kline[4]);
-        return { x: timestamp, y: [open, high, low, close] };
+      const data = sortChart.map((item) => {
+        const timestamp2 = parseInt(item.timestamp, 10);
+        const open2 = parseFloat(item.open);
+        const high2 = parseFloat(item.high);
+        const low2 = parseFloat(item.low);
+        const close2 = parseFloat(item.close);
+        return { x: timestamp2, y: [open2, high2, low2, close2] };
       });
-      setSeries([{ data }]);
+
+      const currentTime = Date.now();
+      const threeHoursAgo = currentTime - 3 * 60 * 60 * 1000;
+      const filteredData = data.filter((candlestick) => candlestick.x >= threeHoursAgo);
+      updateYAxisRange(filteredData);
+      setSeries([{ data: filteredData }]);
+      // console.log(data2, "data2");
+      console.log(data, "sortChart data");
     };
     fetchChartData();
-
-    const connectWebSocket = () => {
-      ws = new WebSocket(websocketUrl);
-      ws.onmessage = (event) => {
-        const kline = JSON.parse(event.data).k;
-        const timestamp = kline.t;
-        const open = parseFloat(kline.o);
-        const high = parseFloat(kline.h);
-        const low = parseFloat(kline.l);
-        const close = parseFloat(kline.c);
-        const newCandlestick = {
-          x: timestamp,
-          y: [open, high, low, close],
-        };
-        if (isMounted) {
-          setSeries((prevState) => {
-            let data = [...prevState[0].data];
-            const lastCandlestick = data[data.length - 1];
-
-            if (lastCandlestick.x === newCandlestick.x) {
-              // Update the last candlestick if it has the same timestamp
-              data[data.length - 1] = newCandlestick;
-            } else {
-              // Add the new candlestick if the timestamp is different
-              data.push(newCandlestick);
-
-              if (data.length > 600) {
-                data.shift();
-              }
-            }
-
-            const currentTime = Date.now();
-            const sixHoursAgo = currentTime - 3 * 60 * 60 * 1000;
-            data = data.filter((candlestick) => candlestick.x >= sixHoursAgo);
-
-            return [{ data }];
-          });
-        }
-      };
-
-      ws.onclose = (event) => {
-        // 웹소켓 연결 종료 시 재접속 시도
-        if (isMounted) {
-          setTimeout(() => {
-            connectWebSocket();
-          }, 1000);
-        }
-      };
-    };
-
-    connectWebSocket();
-
-    return () => {
-      isMounted = false;
-      if (ws) {
-        ws.close();
-      }
-    };
+    console.log(newChart, "newChart");
   }, []);
 
-  const handleTooltip = ({ seriesIndex, dataPointIndex, w }) => {
-    const o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
-    const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
-    const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
-    const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
-    const tooltipTitle = moment(w.globals.seriesX[0][dataPointIndex]).format(
-      "YYYY-MM-DD HH:mm"
-    );
-    return `
-      <div>Open: ${o.toFixed(2)}</div>
-      <div>High: ${h.toFixed(2)}</div>
-      <div>Low: ${l.toFixed(2)}</div>
-      <div>Close: ${c.toFixed(2)}</div>
-    `;
+  const updateYAxisRange = (data) => {
+    if (data.length === 0) {
+      return;
+    }
+
+    let min = data[0].y[2]; // Low
+    let max = data[0].y[1]; // High
+
+    data.forEach((candlestick) => {
+      min = Math.min(min, candlestick.y[2]); // Low
+      max = Math.max(max, candlestick.y[1]); // High
+    });
+
+    setOptions((prevOptions) => ({
+      ...prevOptions,
+      yaxis: {
+        ...prevOptions.yaxis,
+        min: min * 0.99,
+        max: max * 1.01,
+      },
+    }));
   };
+
+  const isInvalidValue = (value) => {
+    return value === null || value === undefined || Number.isNaN(value);
+  };
+
+  const isValidChartData = (chartData) => {
+    if (!chartData) {
+      return false;
+    }
+
+    if (isInvalidValue(chartData.x)) {
+      return false;
+    }
+
+    for (const value of chartData.y) {
+      if (isInvalidValue(value)) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  useEffect(() => {
+    if (isValidChartData(newChart)) {
+      updateChartData(newChart);
+    } else {
+      console.error("Invalid newChartData:", newChart);
+    }
+  }, [newChart]);
+
+  const updateChartData = (newChartData) => {
+    setSeries((prevState) => {
+      let data = [...prevState[0].data];
+      const lastCandlestick = data[data.length - 1];
+
+      if (lastCandlestick?.x === newChartData?.x) {
+        data[data.length - 1] = newChartData;
+      } else {
+        data.push(newChartData);
+        if (data.length > 600) {
+          data.shift();
+        }
+      }
+
+      return [{ data }];
+    });
+  };
+
+  // const handleTooltip = ({ seriesIndex, dataPointIndex, w }) => {
+  //   const o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
+  //   const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
+  //   const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
+  //   const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
+  //   const tooltipTitle = moment(w.globals.seriesX[0][dataPointIndex]).format("YYYY-MM-DD HH:mm");
+
+  //   return `
+  //     <div>Open: ${o.toFixed(2)}</div>
+  //     <div>High: ${h.toFixed(2)}</div>
+  //     <div>Low: ${l.toFixed(2)}</div>
+  //     <div>Close: ${c.toFixed(2)}</div>
+  //   `;
+  // };
 
   return (
     <ChartDiv height={chartHeight}>
@@ -202,7 +217,7 @@ const CandlestickChart = ({ chart }) => {
             enabled: true,
             shared: true,
             intersect: false,
-            custom: handleTooltip,
+            // custom: handleTooltip,
           },
         }}
         series={series}

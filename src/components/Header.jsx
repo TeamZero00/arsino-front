@@ -251,13 +251,7 @@ function Header() {
     const savedChainId = sessionStorage.getItem("chainId");
     const savedWalletName = JSON.parse(sessionStorage.getItem("walletName"));
 
-    if (
-      savedClient &&
-      savedAddress &&
-      savedBalance &&
-      savedChainId &&
-      savedWalletName
-    ) {
+    if (savedClient && savedAddress && savedBalance && savedChainId && savedWalletName) {
       setClient(savedClient);
       setAddress(savedAddress);
       setBalance(savedBalance);
@@ -293,11 +287,7 @@ function Header() {
               </ModalMainDiv>
               <DownBtnDiv>
                 <CloseButton
-                  onClick={() =>
-                    window.open(
-                      `https://testnet.mintscan.io/archway-testnet/account/${address}`
-                    )
-                  }
+                  onClick={() => window.open(`https://testnet.mintscan.io/archway-testnet/account/${address}`)}
                 >
                   Explorer <FiExternalLink />
                 </CloseButton>
@@ -334,7 +324,6 @@ function Header() {
 
   // 네트워크 별로 chainId에 따라서 DISCONNECT와 CONNECT 버튼이 나타나도록 구현
   const renderBtn = () => {
-    console.log(networkInfo);
     return Object.keys(networkInfo).map((id) => {
       if (chainId === id) {
         return (
@@ -347,11 +336,7 @@ function Header() {
         <RightWalletConnect
           type="button"
           onClick={async (event) => {
-            const { name, signer, balance } = await connectWallet(
-              event,
-              networkInfo[id],
-              { getInfo }
-            );
+            const { name, signer, balance } = await connectWallet(event, networkInfo[id], { getInfo });
             console.log("name", name, signer, balance);
             setWallet({
               name,
@@ -398,11 +383,7 @@ function Header() {
       </LeftHeaderNavi>
 
       <RightHeaderNavi>
-        <FaucetBtn
-          onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}
-        >
-          Faucet
-        </FaucetBtn>
+        <FaucetBtn onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}>Faucet</FaucetBtn>
         <div>{renderBtn()}</div>
       </RightHeaderNavi>
     </HeaderDiv>

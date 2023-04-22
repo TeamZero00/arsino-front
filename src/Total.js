@@ -19,6 +19,7 @@ function Total() {
     winners: [],
   });
   const [chart, setChart] = useState([]);
+  const [newChart, setNewChart] = useState([]);
   const [setting, setSetting] = useState(null);
   useEffect(() => {
     const ws = new WebSocket("ws://66.42.38.167:8080");
@@ -46,12 +47,24 @@ function Total() {
           setBettingList(newBettingList);
           break;
         case "new_chart":
-          const newChart = [...chart, data];
-          setChart(newChart);
+          const newChart = [data];
+          const newChartTS = newChart[0].data.timestamp;
+          const newChartOpen = newChart[0].data.open;
+          const newChartHigh = newChart[0].data.high;
+          const newChartLow = newChart[0].data.low;
+          const newChartClose = newChart[0].data.close;
+          const newChartId = newChart[0].data.id;
+          const newSetupChart = {
+            x: newChartTS,
+            y: [newChartOpen, newChartHigh, newChartLow, newChartClose],
+          };
+
+          setNewChart(newSetupChart);
+          console.log("뉴차트셋업", newSetupChart);
           break;
         case "init": {
-          console.log(data.data);
           const { chart, game, poolBalance, price } = data.data;
+          console.log("", data.data);
           setChart(chart);
           setBettingList(game);
           setPool(poolBalance);
@@ -75,9 +88,7 @@ function Total() {
   return (
     <div>
       {setting && (
-        <WalletConnectionContext.Provider
-          value={{ isConnected, setIsConnected }}
-        >
+        <WalletConnectionContext.Provider value={{ isConnected, setIsConnected }}>
           <Header />
           <InfoChart
             isConnected={isConnected}
@@ -86,6 +97,7 @@ function Total() {
             bettingList={bettingList}
             winner={winner}
             chart={chart}
+            newChart={newChart}
           />
         </WalletConnectionContext.Provider>
       )}

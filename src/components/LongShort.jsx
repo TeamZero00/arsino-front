@@ -96,6 +96,13 @@ const OutputAmount = styled.div`
   margin: 10px;
 `;
 
+//
+// 30,50 btn
+const PredictedBtn = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
 function LongShort({ bettingList }) {
   const { isConnected } = useContext(WalletConnectionContext);
   const { balance, setBalance } = useContext(BalanceContext);
@@ -207,6 +214,23 @@ function LongShort({ bettingList }) {
       <OutputDiv>
         <InputPayBalnace>
           <div>x1.97 {clickValue}</div>
+          <PredictedBtn>
+            <button
+              onClick={() => {
+                setDuration(30);
+              }}
+            >
+              30
+            </button>
+            <button
+              onClick={() => {
+                setDuration(50);
+              }}
+            >
+              {" "}
+              50
+            </button>
+          </PredictedBtn>
         </InputPayBalnace>
         <OutputAmount>
           {inputValue ? (
@@ -216,21 +240,7 @@ function LongShort({ bettingList }) {
           )}
         </OutputAmount>
       </OutputDiv>
-      <button
-        onClick={() => {
-          setDuration(30);
-        }}
-      >
-        30
-      </button>
-      <button
-        onClick={() => {
-          setDuration(50);
-        }}
-      >
-        {" "}
-        50
-      </button>
+
       <SmartContractButton
         onClick={GetMyBalance()}
         betType={clickValue}

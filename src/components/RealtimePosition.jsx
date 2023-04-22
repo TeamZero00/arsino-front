@@ -84,20 +84,18 @@ const LoadingDiv = styled.div`
 `;
 
 function RealtimePosition({ height, bettingList }) {
-  console.log(bettingList);
+  // console.log(bettingList);
   const currentBettingList = bettingList.filter((betting) => {
     return betting.status === "Pending";
   });
-  console.log("current", currentBettingList);
+
   return (
     <div>
       <TotalDiv>
         <Titlediv>Realtime Trade</Titlediv>
         <HeaderDiv>
           <HeaderDivLeft>Price(USD)</HeaderDivLeft>
-          <HeaderDivRight style={{ textAlign: "right" }}>
-            Amount(CONST)
-          </HeaderDivRight>
+          <HeaderDivRight style={{ textAlign: "right" }}>Amount(CONST)</HeaderDivRight>
           <HeaderDivRight>Position</HeaderDivRight>
         </HeaderDiv>
         <MainDiv style={{ height: height }}>

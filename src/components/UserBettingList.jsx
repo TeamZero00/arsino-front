@@ -56,9 +56,7 @@ const PositionInfoData = styled.div`
   width: 100%;
 `;
 const fetchHistory = async (address) => {
-  const { data } = await axios.get(
-    `http://${config.serverEndpoint}/bet_history/${address}`
-  );
+  const { data } = await axios.get(`http://${config.serverEndpoint}/bet_history/${address}`);
 
   return data;
 };
@@ -67,22 +65,21 @@ function UserBettingList({ bettingList, winner }) {
   const { wallet } = useContext(WalletContext);
 
   const [userHistory, setUserHistory] = useState([]);
-  console.log(userHistory);
+  // console.log(userHistory);
   useEffect(() => {
     getUserHistory();
   }, [wallet, bettingList]);
 
   const getUserHistory = async () => {
     if (!wallet) {
-      console.log("Null==============WALLET");
       setUserHistory([]);
       return;
     }
 
-    console.log("Set UserHitory");
     const address = wallet.name.bech32Address;
 
     const data = await fetchHistory(address);
+
     const history = await Promise.all(
       data.map(async (item) => {
         const {
@@ -93,13 +90,12 @@ function UserBettingList({ bettingList, winner }) {
               },
             },
           },
-        } = await axios.get(
-          `https://rpc.constantine-2.archway.tech/commit?height=${item.startHeight}`
-        );
+        } = await axios.get(`https://rpc.constantine-2.archway.tech/commit?height=${item.startHeight}`);
         return { ...item, time };
       })
     );
     history.sort((a, b) => b.id - a.id);
+
     setUserHistory(history);
   };
 
@@ -173,33 +169,21 @@ function UserBettingList({ bettingList, winner }) {
         <div></div>
       ) : (
         userHistory.map((history) => {
-          const {
-            position,
-            time,
-            amount,
-            status,
-            winAmount,
-            roundPrice,
-            basePrice,
-          } = history;
+          const { position, time, amount, status, winAmount, roundPrice, basePrice } = history;
 
           return (
             <PositionInfo key={history.id}>
               <PositionInfoData>{formatDate(time)}</PositionInfoData>
               {/* <PositionInfoData>{startHeight}</PositionInfoData>
               <PositionInfoData>{targetHeight}</PositionInfoData> */}
-              <PositionInfoData
-                style={{ color: position === "Long" ? "#0ecb82" : "#f7465d" }}
-              >
+              <PositionInfoData style={{ color: position === "Long" ? "#0ecb82" : "#f7465d" }}>
                 {position}
               </PositionInfoData>
               <PositionInfoData>{amount / 1000000}</PositionInfoData>
               <PositionInfoData>{status}</PositionInfoData>
               <PositionInfoData>{basePrice.toFixed(5)}</PositionInfoData>
               <PositionInfoData>{roundPrice.toFixed(5)}</PositionInfoData>
-              <PositionInfoData
-                style={{ color: status === "Lose" ? "#555555" : "none" }}
-              >
+              <PositionInfoData style={{ color: status === "Lose" ? "#555555" : "none" }}>
                 {winAmount / 1000000}
               </PositionInfoData>
             </PositionInfo>
