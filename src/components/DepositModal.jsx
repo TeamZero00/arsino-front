@@ -1,9 +1,12 @@
 import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import TostContainer from "./TostContainer";
 import styled from "styled-components";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import config from "../config";
+import { WalletContext } from "../App";
 
 const DepositModalWrapper = styled.div`
   position: fixed;
@@ -133,31 +136,28 @@ const DepositContractDiv = styled.div`
 function DepositModal(props) {
   const {
     myBalance,
-    isMyBalance,
-    depositIsOpen,
     setDepositIsOpen,
     network,
     gasPrice,
-    setGasPrice,
     offlineSigner,
-    setOfflineSigner,
     isAccount,
-    setIsAccount,
-    isPoolBalance,
-    setIsPoolBalance,
   } = props;
-  const [handleInputAmount, setHandleInputAmount] = useState("");
+  const { wallet } = useContext(WalletContext);
+  const [amount, setAmount] = useState("");
   const [isReceiveLP, setIsReceiveLP] = useState("0");
   const [getTotalLP, isGetTotalLp] = useState("0");
-  const disabled = sessionStorage.getItem("walletConnection") != "true";
-
+  const disabled = sessionStorage.getItem("walletConnection") !== "true";
+  const memoizedHandAmount = useMemo(
+    () => (event) => {
+      setAmount(event.target.value);
+    },
+    [amount]
+  );
   const ClickedIsOpen = () => {
     setDepositIsOpen(false);
   };
   const handleInput = (e) => {
-    setHandleInputAmount(e.target.value);
-    console.log(e.target.value);
-    console.log("input amount", handleInputAmount);
+    setAmount(e.target.value);
   };
 
   const getReceiveLp = async () => {
@@ -167,36 +167,37 @@ function DepositModal(props) {
         const getTotalMsg = {
           total_supply: {},
         };
-        const totalResult = await client.queryContractSmart(process.env.REACT_APP_LP_CONTRACT_ADDRESS, getTotalMsg);
-
-        isGetTotalLp(totalResult);
-        console.log("getTotalSupply", getTotalLP);
-        return totalResult;
+        const getPoolMsg = {
+          get_pool: {},
+        };
+        const bankContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
+        const totalSupply = await client.queryContractSmart(
+          process.env.REACT_APP_LP_CONTRACT_ADDRESS,
+          getTotalMsg
+        );
+        const { balance } = await client.queryContractSmart(
+          bankContract,
+          getPoolMsg
+        );
+        setIsReceiveLP(balance);
+        isGetTotalLp(totalSupply);
       } catch (err) {
         console.log(err);
       }
     };
     getLPTotalSupply();
-
-    const getPoolMsg = {
-      get_pool: {},
-    };
-    try {
-      const bankContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
-      const result = await client.queryContractSmart(bankContract, getPoolMsg);
-      setIsReceiveLP(result.balance);
-      console.log("get Pool Balance", isReceiveLP);
-    } catch (err) {
-      console.log(err);
-    }
   };
   getReceiveLp();
 
   const depositContract = async () => {
-    const signer = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
-      gasPrice,
-      prefix: network.prefix,
-    });
+    const signer = await SigningArchwayClient.connectWithSigner(
+      network.endpoint,
+      offlineSigner,
+      {
+        gasPrice,
+        prefix: network.prefix,
+      }
+    );
     const executeContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
     try {
       const msg = {
@@ -212,7 +213,7 @@ function DepositModal(props) {
         [
           {
             denom: "uconst",
-            amount: (handleInputAmount * 1000000).toString(),
+            amount: (amount * 1000000).toString(),
           },
         ]
       );
@@ -222,9 +223,7 @@ function DepositModal(props) {
       console.log(logs);
       await getReceiveLp();
       setIsReceiveLP(isReceiveLP);
-      console.log("isReceiveLP", isPoolBalance);
-      console.log("isAccount", isAccount);
-      console.log("myBalance", myBalance);
+
       toast.success(`Tx Hash ${transactionHash}`);
       return {
         height,
@@ -252,20 +251,29 @@ function DepositModal(props) {
         </div>
         <DepositModalInputTotal>
           <DepositModalInputDiv>
-            <input type="number" placeholder="0.0" value={handleInputAmount} onChange={handleInput} />
+            <input
+              type="number"
+              placeholder="0.0"
+              value={amount}
+              onChange={memoizedHandAmount}
+            />
             <DepositModalInputAmount>
-              balance: {sessionStorage.getItem("walletConnection") != null ? myBalance : "0"}
+              balance:{" "}
+              {sessionStorage.getItem("walletConnection") != null
+                ? myBalance
+                : "0"}
             </DepositModalInputAmount>
           </DepositModalInputDiv>
         </DepositModalInputTotal>
         <DepositModalOutputDiv>
           <div>receive LP</div>
-          <div>{handleInputAmount ? ((handleInputAmount / isReceiveLP) * getTotalLP).toFixed(6) : "0"} Token</div>
+          <div>
+            {amount ? ((amount / isReceiveLP) * getTotalLP).toFixed(6) : "0"}{" "}
+            Token
+          </div>
         </DepositModalOutputDiv>
         <DepositContractDiv>
-          <button onClick={depositContract} disabled={disabled}>
-            {!disabled ? "Enter" : "Connect Wallet"}
-          </button>
+          <button onClick={depositContract}>Deposit</button>
         </DepositContractDiv>
       </DepositModalDiv>
       <TostContainer />

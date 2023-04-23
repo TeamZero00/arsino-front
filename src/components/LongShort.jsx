@@ -11,6 +11,7 @@ import BalanceContext from "./BalanceContext";
 import TostContainer from "./TostContainer";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { WalletContext } from "../App";
 
 const RightTotalInfo = styled.div`
   border: 0.5px solid #2e2e2e;
@@ -127,6 +128,7 @@ const PredictedBtn = styled.div`
 function LongShort({ bettingList }) {
   const { isConnected } = useContext(WalletConnectionContext);
   const { balance, setBalance } = useContext(BalanceContext);
+  const { wallet } = useContext(WalletContext);
   const [inputValue, setInPutValue] = useState("");
   const [clickValue, setClickValue] = useState("Long");
   const [duration, setDuration] = useState(30);
@@ -147,11 +149,18 @@ function LongShort({ bettingList }) {
     const gasPrice = GasPrice.fromString("0.01uconst");
     const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
     const accounts = await offlineSigner.getAccounts();
-    const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
-      gasPrice,
-      prefix: network.prefix,
-    });
-    const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+    const testClient = await SigningArchwayClient.connectWithSigner(
+      network.endpoint,
+      offlineSigner,
+      {
+        gasPrice,
+        prefix: network.prefix,
+      }
+    );
+    const clientBalance = await testClient.getBalance(
+      accounts[0].address,
+      "uconst"
+    );
     setLocalGetBalance(clientBalance.amount);
   };
   useEffect(() => {
@@ -266,12 +275,17 @@ function LongShort({ bettingList }) {
 
           <div>
             {" "}
-            {sessionStorage.getItem("walletConnection") != null
+            {wallet != null
               ? `Balance: ${parseFloat(localGetBalance / 1000000).toFixed(6)}`
               : "Balance: 0"}
           </div>
         </InputPayBalnace>
-        <InputAmount type="number" placeholder="0.0" value={inputValue} onChange={handleInputchange} />
+        <InputAmount
+          type="number"
+          placeholder="0.0"
+          value={inputValue}
+          onChange={handleInputchange}
+        />
       </InputDiv>
       <OutputDiv>
         <InputPayBalnace>
@@ -283,7 +297,9 @@ function LongShort({ bettingList }) {
         </InputPayBalnace>
         <OutputAmount>
           {inputValue ? (
-            <div>Prize: {Math.floor(inputValue * 1.97 * 1000000) / 1000000} Const</div>
+            <div>
+              Prize: {Math.floor(inputValue * 1.97 * 1000000) / 1000000} Const
+            </div>
           ) : (
             <div>Prize: 0.00 Const</div>
           )}
@@ -299,7 +315,10 @@ function LongShort({ bettingList }) {
         disabled={!sessionStorage.getItem("walletConnection")}
       />
       <div>
-        <RealtimePosition height={`${rightHeight - 195}px`} bettingList={bettingList} />
+        <RealtimePosition
+          height={`${rightHeight - 195}px`}
+          bettingList={bettingList}
+        />
       </div>
     </RightTotalInfo>
   );

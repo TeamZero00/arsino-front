@@ -5,11 +5,16 @@ import { useEffect } from "react";
 import { useContext, useState } from "react";
 import styled from "styled-components";
 
-import BalanceContext from "../BalanceContext";
-import DepositModal from "../DepositModal";
-import Header from "../Header";
-import WithdrawModal from "../WithdrawModal";
+import BalanceContext from "../components/BalanceContext";
+import DepositModal from "../components/DepositModal";
+import Header from "../components/Header";
+import WithdrawModal from "../components/WithdrawModal";
 import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import config from "../config";
+import { WalletContext } from "../App";
+import connectWallet from "../wallet/connect";
+import networkInfo from "../wallet/network_info";
 
 const BankWrapper = styled.div`
   display: flex;
@@ -460,6 +465,21 @@ const WithdrawContractDiv = styled.div`
     }
   }
 `;
+const WalletConnect = styled.button`
+  background-color: #ff4d00;
+  border: none;
+  margin-top: 50px;
+  padding: 10px 25px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #e4e9f0;
+  border-radius: 5px;
+  &:hover {
+    background-color: #f76a2d;
+    cursor: pointer;
+  }
+`;
+
 async function testnetInfo() {
   const gasPrice = GasPrice.fromString("0.01uconst");
   const offlineSigner = window.getOfflineSigner("constantine-2", gasPrice);
@@ -473,13 +493,17 @@ async function testnetInfo() {
       prefix: "archway",
     }
   );
-  const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
-
-  console.log("client balance", clientBalance);
+  const clientBalance = await testClient.getBalance(
+    accounts[0].address,
+    "uconst"
+  );
 }
 testnetInfo();
 
-function Swap() {
+function Bank({ pool }) {
+  const [lpBalance, setLpBalance] = useState("0");
+  const { wallet, setWallet } = useContext(WalletContext);
+
   const { balance, setBalance } = useContext(BalanceContext);
   const [clickDeposit, setClickDeposit] = useState(true);
   const [clickWithdraw, setClickWithdraw] = useState(false);
@@ -487,7 +511,7 @@ function Swap() {
   const [isPoolBalance, setIsPoolBalance] = useState("");
   const [myBalance, isMyBalance] = useState("");
   const [myAddress, setMyAddress] = useState("");
-  const [isLPBalance, setIsLPBalance] = useState("");
+  // const [isLPBalance, setIsLPBalance] = useState("");
   const [handleInputAmount, setHandleInputAmount] = useState("");
 
   const [gasPrice, setGasPrice] = useState(null);
@@ -512,10 +536,6 @@ function Swap() {
     setClickDeposit(false);
     setClickWithdraw(true);
   };
-  const handleInput = (e) => {
-    setHandleInputAmount(e.target.value);
-    console.log(e.target.value);
-  };
 
   useEffect(() => {
     const networkInfo = async () => {
@@ -526,59 +546,33 @@ function Swap() {
 
       const accounts = await offlineSigner.getAccounts();
       setIsAccount(accounts[0].address);
-      const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
-        gasPrice,
-        prefix: network.prefix,
-      });
-      const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+      const testClient = await SigningArchwayClient.connectWithSigner(
+        network.endpoint,
+        offlineSigner,
+        {
+          gasPrice,
+          prefix: network.prefix,
+        }
+      );
+      const clientBalance = await testClient.getBalance(
+        accounts[0].address,
+        "uconst"
+      );
+      const msg = {
+        balance: { address: accounts[0].address },
+      };
+      const { balance } = await testClient.queryContractSmart(
+        config.lpContract,
+        msg
+      );
 
+      setLpBalance(balance);
       isMyBalance(clientBalance.amount / 1000000);
       setMyAddress(accounts[0].address);
-      console.log(myBalance);
     };
     networkInfo();
   }, []);
 
-  useEffect(() => {
-    const getBankPool = async () => {
-      const client = await ArchwayClient.connect(network.endpoint);
-      const msg = {
-        get_pool: {},
-      };
-      try {
-        const bankContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
-        const result = await client.queryContractSmart(bankContract, msg);
-        console.log(result.balance);
-        setIsPoolBalance(result.balance / 1000000);
-        return result;
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    // LP Pool balance
-    const getLPPool = async () => {
-      const client = await ArchwayClient.connect(network.endpoint);
-      const msg = {
-        balance: { address: myAddress },
-      };
-      try {
-        const result = await client.queryContractSmart(process.env.REACT_APP_LP_CONTRACT_ADDRESS, msg);
-        console.log("getLPPool log", result);
-        setIsLPBalance(result.balance);
-        return result;
-      } catch (err) {
-        console.log("getLPPool err", err);
-      }
-    };
-
-    if (myAddress) {
-      getBankPool();
-      getLPPool();
-    }
-  }, [myAddress]);
-  console.log("myAddress", myAddress);
-  console.log("isPoolBalance", isPoolBalance);
   const DepositForm = () => {
     return (
       <div>
@@ -596,7 +590,11 @@ function Swap() {
               <div>CONST</div>
             </DepositAssetInner>
             <DepositAssetInner>
-              <div>{sessionStorage.getItem("walletConnection") != null ? myBalance : "0"}</div>
+              <div>
+                {sessionStorage.getItem("walletConnection") != null
+                  ? myBalance
+                  : "0"}
+              </div>
             </DepositAssetInner>
           </button>
         </DepositAsset>
@@ -639,7 +637,7 @@ function Swap() {
               <div>AMG (LP)</div>
             </WithdrawAssetInner>
             <WithdrawAssetInner>
-              <div>{sessionStorage.getItem("walletConnection") != null ? isLPBalance / 1000000 : "0"}</div>
+              <div>{(Number(lpBalance) / 1000000).toFixed(6)}</div>
             </WithdrawAssetInner>
           </button>
         </WithdrawAsset>
@@ -647,8 +645,8 @@ function Swap() {
           <WithdrawModal
             depositIsOpen={depositIsOpen}
             setDepositIsOpen={setDepositIsOpen}
-            isLPBalance={isLPBalance}
-            setIsLPBalance={setIsLPBalance}
+            isLPBalance={lpBalance}
+            setIsLPBalance={setLpBalance}
             network={network}
             gasPrice={gasPrice}
             setGasPrice={setGasPrice}
@@ -661,38 +659,6 @@ function Swap() {
           />
         )}
       </div>
-    );
-  };
-
-  const ViewWithdrawModal = () => {
-    return (
-      <WithdrawModalWrapper>
-        <WithdrawModalDiv>
-          <WithdrawModalTitle>
-            AMG (LP)<button onClick={ClickedIsOpen}>X</button>
-          </WithdrawModalTitle>
-          <div>
-            <WithdrawModalContent>
-              <div>Withdraw</div>
-            </WithdrawModalContent>
-          </div>
-          <WithdrawModalInputTotal>
-            <WithdrawModalInputDiv>
-              <input type="number" placeholder="0.0"></input>
-              <WithdrawModalInputAmount>
-                (ex. LP BALANCE) balance: {balance && balance.amount ? balance.amount : "0"}
-              </WithdrawModalInputAmount>
-            </WithdrawModalInputDiv>
-          </WithdrawModalInputTotal>
-          <WithdrawModalOutputDiv>
-            <div>receive CONST</div>
-            <div>0 CONST</div>
-          </WithdrawModalOutputDiv>
-          <WithdrawContractDiv>
-            <button>Enter</button>
-          </WithdrawContractDiv>
-        </WithdrawModalDiv>
-      </WithdrawModalWrapper>
     );
   };
 
@@ -711,34 +677,64 @@ function Swap() {
         <BankTotalPool>
           <BankTotalPoolDiv>
             <BankTotalPoolInner>Total Pool Balance (CONST)</BankTotalPoolInner>
-            <BankTotalPoolData>{isPoolBalance ? isPoolBalance : "Loading..."}</BankTotalPoolData>
+            <BankTotalPoolData>
+              {(Number(pool.balance) / 1000000).toFixed(6)}
+            </BankTotalPoolData>
           </BankTotalPoolDiv>
           <BankTotalPoolDiv>
             <BankTotalPoolInner>Balance in Play</BankTotalPoolInner>
-            <BankTotalPoolData>123456789.00</BankTotalPoolData>
+            <BankTotalPoolData>
+              {(Number(pool.nowGame) / 1000000).toFixed(6)}
+            </BankTotalPoolData>
           </BankTotalPoolDiv>
         </BankTotalPool>
-        <BankWrapperSupply>
-          <button
-            onClick={(event) => {
-              ClickedDeposit();
+        {wallet ? (
+          <>
+            <BankWrapperSupply>
+              <button
+                onClick={(event) => {
+                  ClickedDeposit();
+                }}
+                style={{
+                  borderBottom: clickDeposit ? "2px solid #ff4d00" : "none",
+                }}
+              >
+                Deposit
+              </button>
+              <button
+                onClick={(event) => {
+                  ClickedWithdraw();
+                }}
+                style={{
+                  borderBottom: clickWithdraw ? "2px solid #ff4d00" : "none",
+                }}
+              >
+                Withdraw
+              </button>
+            </BankWrapperSupply>
+            <DepositDiv>
+              {clickDeposit ? <DepositForm /> : <WithdrawForm />}
+            </DepositDiv>
+          </>
+        ) : (
+          <WalletConnect
+            onClick={async () => {
+              const { name, signer, balance } = await connectWallet(
+                networkInfo
+              );
+
+              setWallet({
+                name,
+                balance,
+                signer,
+              });
             }}
-            style={{ borderBottom: clickDeposit ? "2px solid #ff4d00" : "none" }}
           >
-            Deposit
-          </button>
-          <button
-            onClick={(event) => {
-              ClickedWithdraw();
-            }}
-            style={{ borderBottom: clickWithdraw ? "2px solid #ff4d00" : "none" }}
-          >
-            Withdraw
-          </button>
-        </BankWrapperSupply>
-        <DepositDiv>{clickDeposit ? <DepositForm /> : <WithdrawForm />}</DepositDiv>
+            Connect Wallet
+          </WalletConnect>
+        )}
       </BankWrapper>
     </div>
   );
 }
-export default Swap;
+export default Bank;

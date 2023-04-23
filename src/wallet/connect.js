@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
-const connectWallet = async (evnet, chainInfo, { getInfo, setBalance }) => {
+const connectWallet = async (chainInfo) => {
   // 사용자의 브라우저에 Keplr extension이 설치되었는지 확인
   if (!window.getOfflineSigner || !window.keplr) {
     alert("Please install Keplr Extension");
@@ -35,9 +35,6 @@ const connectWallet = async (evnet, chainInfo, { getInfo, setBalance }) => {
   );
 
   const name = await window.keplr.getKey(chainInfo.chainId);
-  // 부모 컴포넌트로 값을 넘겨주기 위한 함수
-
-  getInfo(signer, accounts[0].address, balance, chainInfo.chainId, name);
 
   return {
     name,

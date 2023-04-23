@@ -9,7 +9,7 @@ import { FiExternalLink, FiCopy } from "react-icons/fi";
 import { Link, Route, useLocation } from "react-router-dom";
 import { WalletContext } from "../App";
 import dotenv from "dotenv";
-import Swap from "./Page/Swap";
+
 import WalletConnectionContext from "../WalletConnectionContext";
 dotenv.config();
 
@@ -54,7 +54,7 @@ const RightHeaderNavi = styled.div`
   align-items: center;
 `;
 const RightWalletConnect = styled.button`
-  background-color: #f76a2d;
+  background-color: #ff4d00;
   border: none;
   padding: 10px 25px;
   font-weight: 700;
@@ -62,7 +62,7 @@ const RightWalletConnect = styled.button`
   color: #e4e9f0;
   border-radius: 5px;
   &:hover {
-    background-color: #ff4d00;
+    background-color: #f76a2d;
     cursor: pointer;
   }
 `;
@@ -209,56 +209,41 @@ function Header() {
   const { isConnected, setIsConnected } = useContext(WalletConnectionContext);
   const [isTradeClicked, setIsTradeClicked] = useState(false);
   const [isBankClicked, setIsBankClicked] = useState(false);
+  const [isScoreClicked, setIsScoreClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const location = useLocation();
 
   const TradeLinkClicked = () => {
     setIsTradeClicked(true);
+    setIsScoreClicked(false);
     setIsBankClicked(false);
   };
   const BankLinkClicked = () => {
     setIsTradeClicked(false);
+    setIsScoreClicked(false);
     setIsBankClicked(true);
+  };
+  const ScoreLinkClicked = () => {
+    setIsTradeClicked(false);
+    setIsBankClicked(false);
+    setIsScoreClicked(true);
   };
   useEffect(() => {
     if (location.pathname === "/trade") {
       setIsTradeClicked(true);
+      setIsScoreClicked(false);
       setIsBankClicked(false);
     } else if (location.pathname === "/bank") {
       setIsTradeClicked(false);
+      setIsScoreClicked(false);
       setIsBankClicked(true);
+    } else {
+      setIsTradeClicked(false);
+      setIsBankClicked(false);
+      setIsScoreClicked(true);
     }
   }, [location]);
-  // connectWallet 으로 전달할 함수
-  const getInfo = (client, address, returnedBalance, chainId, walletName) => {
-    setClient(client);
-    setAddress(address);
-    setBalance(returnedBalance);
-    setChainId(chainId);
-    setWalletName(walletName);
-    sessionStorage.setItem("client", JSON.stringify(client));
-    sessionStorage.setItem("address", address);
-    sessionStorage.setItem("balance", JSON.stringify(returnedBalance));
-    sessionStorage.setItem("chainId", chainId);
-    sessionStorage.setItem("walletName", JSON.stringify(walletName));
-    sessionStorage.setItem("walletConnection", true);
-  };
-  useEffect(() => {
-    const savedClient = JSON.parse(sessionStorage.getItem("client"));
-    const savedAddress = sessionStorage.getItem("address");
-    const savedBalance = JSON.parse(sessionStorage.getItem("balance"));
-    const savedChainId = sessionStorage.getItem("chainId");
-    const savedWalletName = JSON.parse(sessionStorage.getItem("walletName"));
-
-    if (savedClient && savedAddress && savedBalance && savedChainId && savedWalletName) {
-      setClient(savedClient);
-      setAddress(savedAddress);
-      setBalance(savedBalance);
-      setChainId(savedChainId);
-      setWalletName(savedWalletName);
-    }
-  }, []);
 
   const Modal = ({ onClick }) => {
     const toggleModal = () => {
@@ -287,7 +272,11 @@ function Header() {
               </ModalMainDiv>
               <DownBtnDiv>
                 <CloseButton
-                  onClick={() => window.open(`https://testnet.mintscan.io/archway-testnet/account/${address}`)}
+                  onClick={() =>
+                    window.open(
+                      `https://testnet.mintscan.io/archway-testnet/account/${address}`
+                    )
+                  }
                 >
                   Explorer <FiExternalLink />
                 </CloseButton>
@@ -297,7 +286,7 @@ function Header() {
           </ModalWrapper>
         )}
         <RightConnectedWallet type="button" onClick={toggleModal}>
-          {walletName.name}
+          {wallet ? wallet.name.name : "connect wallet"}
         </RightConnectedWallet>
       </>
     );
@@ -305,52 +294,39 @@ function Header() {
   // connectWallet으로 가져온 정보를 초기화
   const disconnect = (event) => {
     setWallet(null);
-
-    setClient();
-    setChainId();
-    setAddress();
-    setBalance();
-    setIsConnected(false);
-    sessionStorage.removeItem("client");
-    sessionStorage.removeItem("address");
-    sessionStorage.removeItem("balance");
-    sessionStorage.removeItem("chainId");
-    sessionStorage.removeItem("walletName");
-    sessionStorage.removeItem("walletConnection");
-  };
-  const disBtnClick = () => {
-    setVisible(!isVisible);
   };
 
-  // 네트워크 별로 chainId에 따라서 DISCONNECT와 CONNECT 버튼이 나타나도록 구현
-  const renderBtn = () => {
-    return Object.keys(networkInfo).map((id) => {
-      if (chainId === id) {
-        return (
-          // <RightWalletConnect type="button" onClick={(event) => disconnect(event)}>
+  // // 네트워크 별로 chainId에 따라서 DISCONNECT와 CONNECT 버튼이 나타나도록 구현
+  // const renderBtn = () => {
+  //   return Object.keys(networkInfo).map((id) => {
+  //     if (chainId === id) {
+  //       return (
+  //         // <RightWalletConnect type="button" onClick={(event) => disconnect(event)}>
 
-          <Modal />
-        );
-      }
-      return (
-        <RightWalletConnect
-          type="button"
-          onClick={async (event) => {
-            const { name, signer, balance } = await connectWallet(event, networkInfo[id], { getInfo });
-            console.log("name", name, signer, balance);
-            setWallet({
-              name,
-              balance,
-              signer,
-            });
-          }}
-          className="connect-btn"
-        >
-          Connect Wallet
-        </RightWalletConnect>
-      );
-    });
-  };
+  //         <Modal />
+  //       );
+  //     }
+  //     return (
+  //       <RightWalletConnect
+  //         type="button"
+  //         onClick={async () => {
+  //           const { name, signer, balance } = await connectWallet(
+  //             networkInfo[id]
+  //           );
+  //           console.log("name", name, signer, balance);
+  //           setWallet({
+  //             name,
+  //             balance,
+  //             signer,
+  //           });
+  //         }}
+  //         className="connect-btn"
+  //       >
+  //         Connect Wallet
+  //       </RightWalletConnect>
+  //     );
+  //   });
+  // };
 
   return (
     <HeaderDiv>
@@ -370,6 +346,19 @@ function Header() {
         </LeftHeaderLink>
         <LeftHeaderLink>
           <Link
+            to={"/score"}
+            style={{
+              textDecoration: "none",
+              color: isScoreClicked ? "#ff4d00" : "none",
+            }}
+            onClick={ScoreLinkClicked}
+          >
+            Score
+          </Link>
+        </LeftHeaderLink>
+
+        <LeftHeaderLink>
+          <Link
             to={"/bank"}
             style={{
               textDecoration: "none",
@@ -383,8 +372,42 @@ function Header() {
       </LeftHeaderNavi>
 
       <RightHeaderNavi>
-        <FaucetBtn onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}>Faucet</FaucetBtn>
-        <div>{renderBtn()}</div>
+        <FaucetBtn
+          onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}
+        >
+          Faucet
+        </FaucetBtn>
+        <div>
+          {wallet ? (
+            <RightWalletConnect
+              type="button"
+              onClick={async () => {
+                disconnect();
+              }}
+              className="connect-btn"
+            >
+              {wallet.name.name}
+            </RightWalletConnect>
+          ) : (
+            <RightWalletConnect
+              type="button"
+              onClick={async () => {
+                const { name, signer, balance } = await connectWallet(
+                  networkInfo
+                );
+
+                setWallet({
+                  name,
+                  balance,
+                  signer,
+                });
+              }}
+              className="connect-btn"
+            >
+              Connect Wallet
+            </RightWalletConnect>
+          )}
+        </div>
       </RightHeaderNavi>
     </HeaderDiv>
   );

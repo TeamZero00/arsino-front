@@ -10,6 +10,9 @@ import config from "../config";
 import TostContainer from "./TostContainer";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { WalletContext } from "../App";
+import connectWallet from "../wallet/connect";
+import networkInfo from "../wallet/network_info";
 
 dotenv.config();
 
@@ -34,9 +37,15 @@ const ExecuteButton = styled.button`
   }
 `;
 
-const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance, duration, disabled }) => {
+const SmartContractButton = ({
+  betAmount,
+  betType: positionType,
+  localGetBalance,
+  duration,
+  disabled,
+}) => {
   const { setBalance } = useContext(BalanceContext);
-
+  const { wallet, setWallet } = useContext(WalletContext);
   const executeBalance = localGetBalance;
   const [afterBalance, setAfterBalance] = useState(0);
   const [isLogs, setIsLogs] = useState(null);
@@ -63,10 +72,14 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
       const executeFee = calculateFee(700_000, gasPrice);
       const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
       const accounts = await offlineSigner.getAccounts();
-      const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
-        gasPrice,
-        prefix: network.prefix,
-      });
+      const testClient = await SigningArchwayClient.connectWithSigner(
+        network.endpoint,
+        offlineSigner,
+        {
+          gasPrice,
+          prefix: network.prefix,
+        }
+      );
 
       const position = positionType.toLowerCase();
 
@@ -93,7 +106,10 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
           },
         ]
       );
-      const updatedClientBalance = await testClient.getBalance(accounts[0].address, "uconst");
+      const updatedClientBalance = await testClient.getBalance(
+        accounts[0].address,
+        "uconst"
+      );
       setBalance(updatedClientBalance);
       updateAfterBalance();
 
@@ -118,8 +134,24 @@ const SmartContractButton = ({ betAmount, betType: positionType, localGetBalance
   return (
     <div>
       <ExecuteBtnDiv>
-        <ExecuteButton disabled={disabled} onClick={ExecuteClick}>
-          {!disabled ? "Execute Smart Contract" : "Connected Wallet"}
+        <ExecuteButton
+          onClick={async () => {
+            if (!wallet) {
+              const { name, signer, balance } = await connectWallet(
+                networkInfo
+              );
+
+              setWallet({
+                name,
+                balance,
+                signer,
+              });
+            } else {
+              ExecuteClick();
+            }
+          }}
+        >
+          {wallet ? "Play BET" : "Connected Wallet"}
         </ExecuteButton>
       </ExecuteBtnDiv>
       <TostContainer />

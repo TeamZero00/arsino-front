@@ -8,6 +8,5 @@ const config = {
   bankContract: process.env.REACT_APP_BANK_CONTRACT_ADDRESS,
   serverEndpoint: process.env.REACT_APP_SERVER_ADDRESS,
 };
-console.log("config", config);
 
 export default config;

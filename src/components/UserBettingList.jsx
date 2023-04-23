@@ -56,7 +56,9 @@ const PositionInfoData = styled.div`
   width: 100%;
 `;
 const fetchHistory = async (address) => {
-  const { data } = await axios.get(`http://${config.serverEndpoint}/bet_history/${address}`);
+  const { data } = await axios.get(
+    `http://${config.serverEndpoint}/bet_history/${address}`
+  );
 
   return data;
 };
@@ -65,7 +67,7 @@ function UserBettingList({ bettingList, winner }) {
   const { wallet } = useContext(WalletContext);
 
   const [userHistory, setUserHistory] = useState([]);
-  // console.log(userHistory);
+
   useEffect(() => {
     getUserHistory();
   }, [wallet, bettingList]);
@@ -90,7 +92,10 @@ function UserBettingList({ bettingList, winner }) {
               },
             },
           },
-        } = await axios.get(`https://rpc.constantine-2.archway.tech/commit?height=${item.startHeight}`);
+        } = await axios.get(
+          `https://rpc.constantine-2.archway.tech/commit?height=${item.startHeight}`
+        );
+
         return { ...item, time };
       })
     );
@@ -98,48 +103,6 @@ function UserBettingList({ bettingList, winner }) {
 
     setUserHistory(history);
   };
-
-  //차라리 이벤트 용으로만 쓸까???
-  //서버에서 bettingList 가 바뀌면 보내주고 그때만 좀 바꿀까?
-  //내일 연습용으로 json 파일 바뀌는거 한번 확인해보자.
-  // useEffect(() => {
-  //   console.log("winners", winner);
-
-  //   const { height, winners } = winner;
-  //   console.log(height, winners);
-  //   const address = sessionStorage.getItem("address");
-  //   let isWinner = false;
-  //   let winAmount = 0;
-  //   if (winners.length !== 0) {
-  //     winners.forEach((winner) => {
-  //       if (address === winner.address) {
-  //         isWinner = true;
-  //         winAmount = winner.amount;
-  //       }
-  //     });
-  //   }
-  //   const newUserHistory = userHistory.map((history) => {
-  //     if (history.targetHeight !== height) {
-  //       return history;
-  //     }
-  //     if (history.targetHeight === height && isWinner) {
-  //       return {
-  //         ...history,
-  //         winAmount: winAmount,
-  //         status: "Win",
-  //       };
-  //     }
-
-  //     if (history.targetHeight === height && !isWinner) {
-  //       return {
-  //         ...history,
-  //         winAmount: winAmount,
-  //         status: "Lose",
-  //       };
-  //     }
-  //   });
-  //   setUserHistory(newUserHistory);
-  // }, [bettingList]);
 
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -169,21 +132,33 @@ function UserBettingList({ bettingList, winner }) {
         <div></div>
       ) : (
         userHistory.map((history) => {
-          const { position, time, amount, status, winAmount, roundPrice, basePrice } = history;
+          const {
+            position,
+            time,
+            amount,
+            status,
+            winAmount,
+            roundPrice,
+            basePrice,
+          } = history;
 
           return (
             <PositionInfo key={history.id}>
               <PositionInfoData>{formatDate(time)}</PositionInfoData>
               {/* <PositionInfoData>{startHeight}</PositionInfoData>
               <PositionInfoData>{targetHeight}</PositionInfoData> */}
-              <PositionInfoData style={{ color: position === "Long" ? "#0ecb82" : "#f7465d" }}>
+              <PositionInfoData
+                style={{ color: position === "Long" ? "#0ecb82" : "#f7465d" }}
+              >
                 {position}
               </PositionInfoData>
               <PositionInfoData>{amount / 1000000}</PositionInfoData>
               <PositionInfoData>{status}</PositionInfoData>
               <PositionInfoData>{basePrice.toFixed(5)}</PositionInfoData>
               <PositionInfoData>{roundPrice.toFixed(5)}</PositionInfoData>
-              <PositionInfoData style={{ color: status === "Lose" ? "#555555" : "none" }}>
+              <PositionInfoData
+                style={{ color: status === "Lose" ? "#555555" : "none" }}
+              >
                 {winAmount / 1000000}
               </PositionInfoData>
             </PositionInfo>
