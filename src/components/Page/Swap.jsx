@@ -9,6 +9,7 @@ import BalanceContext from "../BalanceContext";
 import DepositModal from "../DepositModal";
 import Header from "../Header";
 import WithdrawModal from "../WithdrawModal";
+import "react-toastify/dist/ReactToastify.css";
 
 const BankWrapper = styled.div`
   display: flex;

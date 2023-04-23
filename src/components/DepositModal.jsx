@@ -1,6 +1,9 @@
 import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
 import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import TostContainer from "./TostContainer";
 import styled from "styled-components";
+import "react-toastify/dist/ReactToastify.css";
 
 const DepositModalWrapper = styled.div`
   position: fixed;
@@ -222,6 +225,7 @@ function DepositModal(props) {
       console.log("isReceiveLP", isPoolBalance);
       console.log("isAccount", isAccount);
       console.log("myBalance", myBalance);
+      toast.success(`Tx Hash ${transactionHash}`);
       return {
         height,
         transactionHash,
@@ -231,6 +235,7 @@ function DepositModal(props) {
     } catch (err) {
       console.log("deposit error");
       console.log(err);
+      toast.error(`error ${err}`);
     }
   };
 
@@ -263,6 +268,7 @@ function DepositModal(props) {
           </button>
         </DepositContractDiv>
       </DepositModalDiv>
+      <TostContainer />
     </DepositModalWrapper>
   );
 }

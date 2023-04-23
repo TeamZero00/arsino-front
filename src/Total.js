@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import InfoChart from "./components/InfoChart";
 import WalletConnectionContext from "./WalletConnectionContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Total() {
   const [isConnected, setIsConnected] = useState(false);

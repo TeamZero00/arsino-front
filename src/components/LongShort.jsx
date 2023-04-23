@@ -8,6 +8,9 @@ import networkInfo from "../wallet/network_info";
 import WalletConnectionContext from "../WalletConnectionContext";
 import SmartContractButton from "./ArchwayQuery";
 import BalanceContext from "./BalanceContext";
+import TostContainer from "./TostContainer";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const RightTotalInfo = styled.div`
   border: 0.5px solid #2e2e2e;
@@ -59,6 +62,7 @@ const ShortButton = styled.button`
 
 const InputDiv = styled.div`
   border: 0.5px solid #2e2e2e;
+  border-radius: 10px;
   margin-bottom: 15px;
   background-color: #181818;
 `;
@@ -89,10 +93,12 @@ const InputAmount = styled.input`
 const OutputDiv = styled.div`
   border: 0.5px solid #2e2e2e;
   background-color: #181818;
+  border-radius: 10px;
 `;
 const OutputAmount = styled.div`
   color: #e4e9f0;
   font-size: 20px;
+  font-weight: 600;
   margin: 10px;
 `;
 
@@ -100,7 +106,22 @@ const OutputAmount = styled.div`
 // 30,50 btn
 const PredictedBtn = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: space-around;
+
+  button {
+    border-radius: 10px;
+    width: 40px;
+    margin-right: 5px;
+    /* background-color: */
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    &:hover {
+      cursor: pointer;
+      background-color: #ff621f !important;
+      color: white !important;
+    }
+  }
 `;
 
 function LongShort({ bettingList }) {
@@ -113,6 +134,8 @@ function LongShort({ bettingList }) {
   const [isLongClick, setIsLongClick] = useState(true);
   const [rightHeight, setRightHeight] = useState(window.innerHeight * 0.45);
   const [localGetBalance, setLocalGetBalance] = useState(0);
+  const [is30Click, setIs30Click] = useState(true);
+  const [is50Click, setIs50Click] = useState(false);
 
   const network = {
     chainId: "constantine-2",
@@ -147,6 +170,15 @@ function LongShort({ bettingList }) {
     setIsShortClick(true);
     setIsLongClick(false);
   };
+  const handle50Click = () => {
+    setIs30Click(false);
+    setIs50Click(true);
+  };
+  const handle30Click = () => {
+    setIs30Click(true);
+    setIs50Click(false);
+  };
+
   const handleClickValue = (e) => {
     setClickValue(e.target.value);
   };
@@ -200,7 +232,37 @@ function LongShort({ bettingList }) {
       </BtnTotal>
       <InputDiv>
         <InputPayBalnace>
-          {inputValue ? <div>Pay: {Math.floor(inputValue * 100) / 100} Const</div> : <div>Pay: 0.00 Const</div>}
+          <PredictedBtn>
+            <div>
+              <button
+                onClick={() => {
+                  setDuration(30);
+                  handle30Click();
+                }}
+                style={{
+                  backgroundColor: is30Click ? "#ff4d00" : "#181818",
+                  color: is30Click ? "white" : "#777777",
+                }}
+              >
+                30
+              </button>
+            </div>
+            <div>
+              <button
+                onClick={() => {
+                  setDuration(50);
+                  handle50Click();
+                }}
+                style={{
+                  backgroundColor: is50Click ? "#ff4d00" : "#181818",
+                  color: is50Click ? "white" : "#777777",
+                }}
+              >
+                {" "}
+                50
+              </button>
+            </div>
+          </PredictedBtn>
 
           <div>
             {" "}
@@ -213,30 +275,17 @@ function LongShort({ bettingList }) {
       </InputDiv>
       <OutputDiv>
         <InputPayBalnace>
-          <div>x1.97 {clickValue}</div>
-          <PredictedBtn>
-            <button
-              onClick={() => {
-                setDuration(30);
-              }}
-            >
-              30
-            </button>
-            <button
-              onClick={() => {
-                setDuration(50);
-              }}
-            >
-              {" "}
-              50
-            </button>
-          </PredictedBtn>
+          <div>{clickValue} 1.97x</div>
+          <div>
+            <div>Predicted Blocks</div>
+            <div>{duration}</div>
+          </div>
         </InputPayBalnace>
         <OutputAmount>
           {inputValue ? (
-            <div>Win: {Math.floor(inputValue * 1.97 * 1000000) / 1000000} Const</div>
+            <div>Prize: {Math.floor(inputValue * 1.97 * 1000000) / 1000000} Const</div>
           ) : (
-            <div>Win: 0.00 Const</div>
+            <div>Prize: 0.00 Const</div>
           )}
         </OutputAmount>
       </OutputDiv>

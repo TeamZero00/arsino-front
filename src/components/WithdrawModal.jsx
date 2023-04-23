@@ -3,7 +3,9 @@ import { useState } from "react";
 import styled from "styled-components";
 
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import TostContainer from "./TostContainer";
 const WithdrawModalWrapper = styled.div`
   position: fixed;
   top: 0;
@@ -227,10 +229,12 @@ function WithdrawModal({
       //   undefined
       // );
       // console.log(withdrawResult);
-      const executeMulti = await signer.executeMultiple(isAccount, messages, "auto", undefined);
+      const { transactionHash, executeMulti } = await signer.executeMultiple(isAccount, messages, "auto", undefined);
       console.log(executeMulti);
+      toast.success(`Tx Hash ${transactionHash}`);
     } catch (err) {
       console.log(err);
+      toast.error(`error ${err}`);
     }
   };
   return (
@@ -262,6 +266,7 @@ function WithdrawModal({
           </button>
         </WithdrawContractDiv>
       </WithdrawModalDiv>
+      <TostContainer />
     </WithdrawModalWrapper>
   );
 }
