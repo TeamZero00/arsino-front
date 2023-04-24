@@ -5,8 +5,8 @@ import TostContainer from "./TostContainer";
 import styled from "styled-components";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import config from "../config";
 import { WalletContext } from "../App";
+import config from "../config";
 
 const DepositModalWrapper = styled.div`
   position: fixed;
@@ -142,11 +142,11 @@ function DepositModal(props) {
     offlineSigner,
     isAccount,
   } = props;
-  const { wallet } = useContext(WalletContext);
+
   const [amount, setAmount] = useState("");
   const [isReceiveLP, setIsReceiveLP] = useState("0");
   const [getTotalLP, isGetTotalLp] = useState("0");
-  const disabled = sessionStorage.getItem("walletConnection") !== "true";
+  const { wallet } = useContext(WalletContext);
   const memoizedHandAmount = useMemo(
     () => (event) => {
       setAmount(event.target.value);
@@ -155,9 +155,6 @@ function DepositModal(props) {
   );
   const ClickedIsOpen = () => {
     setDepositIsOpen(false);
-  };
-  const handleInput = (e) => {
-    setAmount(e.target.value);
   };
 
   const getReceiveLp = async () => {
@@ -218,13 +215,16 @@ function DepositModal(props) {
         ]
       );
 
-      console.log(height);
-      console.log(transactionHash);
-      console.log(logs);
       await getReceiveLp();
       setIsReceiveLP(isReceiveLP);
 
       toast.success(`Tx Hash ${transactionHash}`);
+
+      const respose = await axios.post(`${config.serverEndpoint}/deposit`, {
+        address: wallet.name.bech32Address,
+        amount: (amount * 1000000).toString(),
+      });
+      console.log("res=======", respose);
       return {
         height,
         transactionHash,
@@ -258,10 +258,7 @@ function DepositModal(props) {
               onChange={memoizedHandAmount}
             />
             <DepositModalInputAmount>
-              balance:{" "}
-              {sessionStorage.getItem("walletConnection") != null
-                ? myBalance
-                : "0"}
+              balance: {wallet ? wallet.balance.amount : "0"}
             </DepositModalInputAmount>
           </DepositModalInputDiv>
         </DepositModalInputTotal>

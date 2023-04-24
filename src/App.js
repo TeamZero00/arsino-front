@@ -7,6 +7,8 @@ import Total from "./Total";
 import Bank from "./Page/Bank";
 import Score from "./Page/Score";
 import { QueryClient, QueryClientProvider } from "react-query";
+import connectWallet from "./wallet/connect";
+import networkInfo from "./wallet/network_info";
 export const WalletContext = createContext();
 const queryClient = new QueryClient();
 function App({ getInfo }) {
@@ -27,7 +29,15 @@ function App({ getInfo }) {
   const [chart, setChart] = useState([]);
   const [newChart, setNewChart] = useState([]);
   const [setting, setSetting] = useState(null);
+
   useEffect(() => {
+    if (!wallet) {
+      const wallet = sessionStorage.getItem("wallet");
+      console.log(wallet);
+      if (!wallet) {
+        setWallet(wallet);
+      }
+    }
     const ws = new WebSocket("ws://66.42.38.167:8080");
     setSocket(ws);
     // DB WS
@@ -115,7 +125,7 @@ function App({ getInfo }) {
                 />
               }
             />
-            <Route path="/score" element={<Score />} />
+            {/* <Route path="/score" element={<Score />} /> */}
             <Route path="/bank" element={<Bank pool={pool} />} />
           </Routes>
         </QueryClientProvider>

@@ -209,39 +209,43 @@ function Header() {
   const { isConnected, setIsConnected } = useContext(WalletConnectionContext);
   const [isTradeClicked, setIsTradeClicked] = useState(false);
   const [isBankClicked, setIsBankClicked] = useState(false);
-  const [isScoreClicked, setIsScoreClicked] = useState(false);
+  // const [isScoreClicked, setIsScoreClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   const location = useLocation();
-
+  useEffect(() => {
+    if (wallet) {
+      sessionStorage.setItem("wallet", wallet);
+    }
+  }, [wallet]);
   const TradeLinkClicked = () => {
     setIsTradeClicked(true);
-    setIsScoreClicked(false);
+    // setIsScoreClicked(false);
     setIsBankClicked(false);
   };
   const BankLinkClicked = () => {
     setIsTradeClicked(false);
-    setIsScoreClicked(false);
+    // setIsScoreClicked(false);
     setIsBankClicked(true);
   };
   const ScoreLinkClicked = () => {
     setIsTradeClicked(false);
     setIsBankClicked(false);
-    setIsScoreClicked(true);
+    // setIsScoreClicked(true);
   };
   useEffect(() => {
     if (location.pathname === "/trade") {
       setIsTradeClicked(true);
-      setIsScoreClicked(false);
+      // setIsScoreClicked(false);
       setIsBankClicked(false);
     } else if (location.pathname === "/bank") {
       setIsTradeClicked(false);
-      setIsScoreClicked(false);
+      // setIsScoreClicked(false);
       setIsBankClicked(true);
     } else {
       setIsTradeClicked(false);
       setIsBankClicked(false);
-      setIsScoreClicked(true);
+      // setIsScoreClicked(true);
     }
   }, [location]);
 
@@ -264,7 +268,7 @@ function Header() {
               <ModalMainDiv>
                 <h3>Wallet Address</h3>
                 <ModalMainInnerDiv>
-                  {address}
+                  {wallet.name.bech32Address}
                   <button>
                     <FiCopy />
                   </button>
@@ -294,39 +298,9 @@ function Header() {
   // connectWallet으로 가져온 정보를 초기화
   const disconnect = (event) => {
     setWallet(null);
+    setIsOpen(false);
+    sessionStorage.removeItem("wallet");
   };
-
-  // // 네트워크 별로 chainId에 따라서 DISCONNECT와 CONNECT 버튼이 나타나도록 구현
-  // const renderBtn = () => {
-  //   return Object.keys(networkInfo).map((id) => {
-  //     if (chainId === id) {
-  //       return (
-  //         // <RightWalletConnect type="button" onClick={(event) => disconnect(event)}>
-
-  //         <Modal />
-  //       );
-  //     }
-  //     return (
-  //       <RightWalletConnect
-  //         type="button"
-  //         onClick={async () => {
-  //           const { name, signer, balance } = await connectWallet(
-  //             networkInfo[id]
-  //           );
-  //           console.log("name", name, signer, balance);
-  //           setWallet({
-  //             name,
-  //             balance,
-  //             signer,
-  //           });
-  //         }}
-  //         className="connect-btn"
-  //       >
-  //         Connect Wallet
-  //       </RightWalletConnect>
-  //     );
-  //   });
-  // };
 
   return (
     <HeaderDiv>
@@ -344,7 +318,7 @@ function Header() {
             Trade
           </Link>
         </LeftHeaderLink>
-        <LeftHeaderLink>
+        {/* <LeftHeaderLink>
           <Link
             to={"/score"}
             style={{
@@ -355,7 +329,7 @@ function Header() {
           >
             Score
           </Link>
-        </LeftHeaderLink>
+        </LeftHeaderLink> */}
 
         <LeftHeaderLink>
           <Link
@@ -377,17 +351,10 @@ function Header() {
         >
           Faucet
         </FaucetBtn>
+
         <div>
           {wallet ? (
-            <RightWalletConnect
-              type="button"
-              onClick={async () => {
-                disconnect();
-              }}
-              className="connect-btn"
-            >
-              {wallet.name.name}
-            </RightWalletConnect>
+            <Modal />
           ) : (
             <RightWalletConnect
               type="button"

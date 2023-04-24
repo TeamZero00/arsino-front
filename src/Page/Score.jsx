@@ -1,34 +1,45 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import Header from "../components/Header";
 import config from "../config";
 import { useQuery } from "react-query";
-
-async function fetchScore() {
-  const { data } = await axios.get(
-    `http://${config.serverEndpoint}/score/archway1ukrazgltrvyg99j0m7arhk4nu4u05sdt0l05t0`
-  );
-
-  return data;
-}
-
+import { WalletContext } from "../App";
+import styled from "styled-components";
+const Title = styled.h2`
+  width: 100px;
+  height: 100px;
+  color: "white";
+`;
 const Score = () => {
+  const { wallet } = useContext(WalletContext);
   const [userScore, setUserScore] = useState();
   const [rank, setRank] = useState();
 
-  const { isLoading, isError, error } = useQuery("score", fetchScore, {
-    refetchOnWindowFocus: false,
-    retry: 1, // 실패시 재호출 몇번 할지
-    onSuccess: (data) => {
-      const { userPrize, rank } = data;
-      setUserScore(userPrize);
-      setRank(rank);
-    },
-  });
-  if (isLoading) {
-    console.log("Loading....");
+  const { isLoading, isError, error } = useQuery(
+    "score",
+    async () => {
+      const { data } = await axios.get(
+        `${config.serverEndpoint}/score/${
+          wallet ? wallet.name.address : "archway1"
+        }`
+      );
 
+      return data;
+    },
+
+    {
+      refetchOnWindowFocus: false,
+      retry: 0, // 실패시 재호출 몇번 할지
+      onSuccess: (data) => {
+        console.log(data);
+        const { userPrize, rank } = data;
+        setUserScore(userPrize);
+        setRank(rank);
+      },
+    }
+  );
+  if (isLoading) {
     return (
       <>
         <Header />
@@ -50,7 +61,7 @@ const Score = () => {
   return (
     <>
       <Header />
-      <div></div>
+      <Title>Hello</Title>
     </>
   );
 };

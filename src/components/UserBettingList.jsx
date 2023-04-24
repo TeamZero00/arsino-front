@@ -57,7 +57,7 @@ const PositionInfoData = styled.div`
 `;
 const fetchHistory = async (address) => {
   const { data } = await axios.get(
-    `http://${config.serverEndpoint}/bet_history/${address}`
+    `${config.serverEndpoint}/bet_history/${address}`
   );
 
   return data;
