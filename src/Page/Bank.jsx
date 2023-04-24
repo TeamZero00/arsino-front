@@ -262,7 +262,6 @@ function Bank({ pool }) {
   const [lpBalance, setLpBalance] = useState("0");
   const { wallet, setWallet } = useContext(WalletContext);
 
-  const { balance, setBalance } = useContext(BalanceContext);
   const [clickDeposit, setClickDeposit] = useState(true);
   const [clickWithdraw, setClickWithdraw] = useState(false);
   const [depositIsOpen, setDepositIsOpen] = useState(false);
