@@ -94,7 +94,8 @@ const GttBtnDiv = styled.div`
 `;
 
 function LandingPage() {
-  const descText = "Experience ZERO Margin Forex Trading for Individual Involvement";
+  const descText =
+    "Experience ZERO Margin Forex Trading for Individual Involvement";
   const [landingText, setLandingText] = useState("");
   const [textCount, setTextCount] = useState(0);
 
@@ -121,20 +122,41 @@ function LandingPage() {
   }, [bgIndex]);
   return (
     <LandingWrapperDiv>
-      <LandingImg className={bgIndex === 1 ? "" : "bg1"} alt="greeb" src="/src/LandingWrapperGreen.svg" />
-      <LandingImg className={bgIndex === 1 ? "bg1" : ""} alt="red" src="/src/LandingWrapper.svg" />
+      <LandingImg
+        className={bgIndex === 1 ? "" : "bg1"}
+        alt="greeb"
+        src="/src/LandingWrapperGreen.svg"
+      />
+      <LandingImg
+        className={bgIndex === 1 ? "bg1" : ""}
+        alt="red"
+        src="/src/LandingWrapper.svg"
+      />
       <LandingHeaderDiv>
-        <LandingHeaderNameInfo alt="brandnameinfo" src="/src/LandingMainNameInfo.svg" />
+        <LandingHeaderNameInfo
+          alt="brandnameinfo"
+          src="/src/LandingMainNameInfo.svg"
+        />
         <LandingTextDiv>{landingText}</LandingTextDiv>
         <GttBtn>
           <GttBtnDiv>
-            <FaGithub onClick={() => window.open("https://github.com/TeamZero00", "_blank")} />
+            <FaGithub
+              onClick={() =>
+                window.open("https://github.com/TeamZero00", "_blank")
+              }
+            />
           </GttBtnDiv>
           <GttBtnDiv>
-            <FaTelegramPlane onClick={() => window.open("https://t.me/zero_node", "_blank")} />
+            <FaTelegramPlane
+              onClick={() => window.open("https://t.me/zero_node", "_blank")}
+            />
           </GttBtnDiv>
           <GttBtnDiv>
-            <FaTwitter onClick={() => window.open("https://twitter.com/zero_N0de", "_blank")} />
+            <FaTwitter
+              onClick={() =>
+                window.open("https://twitter.com/zero_N0de", "_blank")
+              }
+            />
           </GttBtnDiv>
         </GttBtn>
         <DescMainBtn>

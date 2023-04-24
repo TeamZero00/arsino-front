@@ -95,7 +95,9 @@ function RealtimePosition({ height, bettingList }) {
         <Titlediv>Realtime Trade</Titlediv>
         <HeaderDiv>
           <HeaderDivLeft>Price(USD)</HeaderDivLeft>
-          <HeaderDivRight style={{ textAlign: "right" }}>Amount(CONST)</HeaderDivRight>
+          <HeaderDivRight style={{ textAlign: "right" }}>
+            Amount(CONST)
+          </HeaderDivRight>
           <HeaderDivRight>Position</HeaderDivRight>
         </HeaderDiv>
         <MainDiv style={{ height: height }}>
