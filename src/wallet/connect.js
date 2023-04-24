@@ -11,12 +11,15 @@ const connectWallet = async (chainInfo) => {
   if (window.keplr.experimentalSuggestChain) {
     try {
       await window.keplr.experimentalSuggestChain(chainInfo);
-    } catch {
+    } catch (error) {
       alert("Failed to suggest the chain");
+      console.error("Error in experimentalSuggestChain:", error);
+      console.log(window.keplr.experimentalSuggestChain);
     }
   } else {
     alert("Please use the recent version of keplr extension");
   }
+  console.log("chainInfo", chainInfo);
   // Keplr에 chainId로의 접근 요청
   await window.keplr.enable(chainInfo.chainId);
   // 체인 ID를 이용해서 OfflineSigner 가져오기
@@ -24,15 +27,9 @@ const connectWallet = async (chainInfo) => {
   // address & public key 페어 배열 리턴
   const accounts = await offlineSigner.getAccounts();
   // SigningCosmWasmClient 생성
-  const signer = await SigningCosmWasmClient.connectWithSigner(
-    chainInfo.rpc,
-    offlineSigner
-  );
+  const signer = await SigningCosmWasmClient.connectWithSigner(chainInfo.rpc, offlineSigner);
   // 해당 주소의 balance 가져오기
-  const balance = await signer.getBalance(
-    accounts[0].address,
-    chainInfo.stakeCurrency.coinMinimalDenom
-  );
+  const balance = await signer.getBalance(accounts[0].address, chainInfo.stakeCurrency.coinMinimalDenom);
 
   const name = await window.keplr.getKey(chainInfo.chainId);
 

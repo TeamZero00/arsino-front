@@ -51,7 +51,7 @@ const networkInfo = {
       // 실제 블록체인에서 사용되는 코인 명칭
       coinMinimalDenom: "uconst",
       // upebble를 PEBBLE로 변환하는 소수점 이하 자릿수
-      coinDecimals: "archway",
+      coinDecimals: 6,
     },
   ],
   // (Optional) ENS에서 주소를 가져올 때만 사용되는 정보로 BIP44의 coinType과 일치하는 것이 좋음

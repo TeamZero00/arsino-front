@@ -276,11 +276,7 @@ function Header() {
               </ModalMainDiv>
               <DownBtnDiv>
                 <CloseButton
-                  onClick={() =>
-                    window.open(
-                      `https://testnet.mintscan.io/archway-testnet/account/${address}`
-                    )
-                  }
+                  onClick={() => window.open(`https://testnet.mintscan.io/archway-testnet/account/${address}`)}
                 >
                   Explorer <FiExternalLink />
                 </CloseButton>
@@ -346,11 +342,7 @@ function Header() {
       </LeftHeaderNavi>
 
       <RightHeaderNavi>
-        <FaucetBtn
-          onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}
-        >
-          Faucet
-        </FaucetBtn>
+        <FaucetBtn onClick={() => window.open(process.env.REACT_APP_FAUCET_URL)}>Faucet</FaucetBtn>
 
         <div>
           {wallet ? (
@@ -359,9 +351,7 @@ function Header() {
             <RightWalletConnect
               type="button"
               onClick={async () => {
-                const { name, signer, balance } = await connectWallet(
-                  networkInfo
-                );
+                const { name, signer, balance } = await connectWallet(networkInfo);
 
                 setWallet({
                   name,
