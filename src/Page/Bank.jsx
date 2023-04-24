@@ -15,6 +15,7 @@ import config from "../config";
 import { WalletContext } from "../App";
 import connectWallet from "../wallet/connect";
 import networkInfo from "../wallet/network_info";
+import axios from "axios";
 
 const BankWrapper = styled.div`
   display: flex;
@@ -261,7 +262,7 @@ testnetInfo();
 function Bank({ pool }) {
   const [lpBalance, setLpBalance] = useState("0");
   const { wallet, setWallet } = useContext(WalletContext);
-
+  const [userBalance, setUserBalance] = useState("0");
   const [clickDeposit, setClickDeposit] = useState(true);
   const [clickWithdraw, setClickWithdraw] = useState(false);
   const [depositIsOpen, setDepositIsOpen] = useState(false);
@@ -322,7 +323,7 @@ function Bank({ pool }) {
         config.lpContract,
         msg
       );
-
+      await axios.get(`${config.serverEndpoint}/deposit`);
       setLpBalance(balance);
       isMyBalance(clientBalance.amount / 1000000);
       setMyAddress(accounts[0].address);
@@ -423,7 +424,7 @@ function Bank({ pool }) {
           Bank
           <BankWrapperInfos>
             CONST Rewareds
-            <BankWrapperRewards>123.24</BankWrapperRewards>
+            <BankWrapperRewards>{userBalance}</BankWrapperRewards>
             <button>Claim</button>
           </BankWrapperInfos>
         </BankWrapperHeader>

@@ -17,7 +17,6 @@ const CandlestickChart = ({ chart, newChart }) => {
     chart: {
       background: "#181818",
       type: "candlestick",
-
       toolbar: false,
       animations: {
         enabled: false,
@@ -95,6 +94,7 @@ const CandlestickChart = ({ chart, newChart }) => {
   }, []);
 
   const [series, setSeries] = useState([{ data: [] }]);
+
   const sortWebsocketUrl = "ws://66.42.38.167:8080";
   const sortChart = chart.sort((a, b) => {
     return a.id - b.id;
@@ -118,12 +118,23 @@ const CandlestickChart = ({ chart, newChart }) => {
       updateYAxisRange(filteredData);
       setSeries([{ data: filteredData }]);
       // console.log(data2, "data2");
-      console.log(data, "sortChart data");
     };
     fetchChartData();
-    console.log(newChart, "newChart");
   }, []);
+  console.log("series", series);
+  const updateXAxisRange = () => {
+    const currentTime = Date.now();
+    const threeHoursAgo = currentTime - 1 * 60 * 60 * 1000;
 
+    setOptions((prevOptions) => ({
+      ...prevOptions,
+      xaxis: {
+        ...prevOptions.xaxis,
+        min: threeHoursAgo,
+        max: currentTime,
+      },
+    }));
+  };
   const updateYAxisRange = (data) => {
     if (data.length === 0) {
       return;
@@ -137,12 +148,14 @@ const CandlestickChart = ({ chart, newChart }) => {
       max = Math.max(max, candlestick.y[1]); // High
     });
 
+    const rangePadding = (max - min) * 0.2; // 10% 패딩 추가
+
     setOptions((prevOptions) => ({
       ...prevOptions,
       yaxis: {
         ...prevOptions.yaxis,
-        min: min * 0.99,
-        max: max * 1.01,
+        min: min - rangePadding,
+        max: max + rangePadding,
       },
     }));
   };
@@ -181,9 +194,11 @@ const CandlestickChart = ({ chart, newChart }) => {
     setSeries((prevState) => {
       let data = [...prevState[0].data];
       const lastCandlestick = data[data.length - 1];
-
-      if (lastCandlestick?.x === newChartData?.x) {
+      console.log(lastCandlestick.x, "lastCandlestick");
+      console.log(newChartData.x, "newChartData");
+      if (lastCandlestick.x == newChartData.x) {
         data[data.length - 1] = newChartData;
+        console.log(newChartData);
       } else {
         data.push(newChartData);
         if (data.length > 600) {
@@ -191,7 +206,8 @@ const CandlestickChart = ({ chart, newChart }) => {
         }
       }
 
-      return [{ data }];
+      updateXAxisRange();
+      return [{ data: [...data] }];
     });
   };
 
