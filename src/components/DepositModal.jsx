@@ -200,7 +200,7 @@ function DepositModal(props) {
       const msg = {
         deposit: {},
       };
-      console.log(offlineSigner);
+
       const { height, transactionHash, gasUsed, logs } = await signer.execute(
         isAccount,
         executeContract,
@@ -224,7 +224,7 @@ function DepositModal(props) {
         address: wallet.name.bech32Address,
         amount: (amount * 1000000).toString(),
       });
-      console.log("res=======", respose);
+
       return {
         height,
         transactionHash,
@@ -232,7 +232,6 @@ function DepositModal(props) {
         logs,
       };
     } catch (err) {
-      console.log("deposit error");
       console.log(err);
       toast.error(`error ${err}`);
     }

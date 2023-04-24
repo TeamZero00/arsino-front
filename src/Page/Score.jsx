@@ -32,7 +32,6 @@ const Score = () => {
       refetchOnWindowFocus: false,
       retry: 0, // 실패시 재호출 몇번 할지
       onSuccess: (data) => {
-        console.log(data);
         const { userPrize, rank } = data;
         setUserScore(userPrize);
         setRank(rank);

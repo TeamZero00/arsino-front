@@ -1,11 +1,15 @@
 import { ArchwayClient, SigningArchwayClient } from "@archwayhq/arch3.js/build";
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import styled from "styled-components";
 
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TostContainer from "./TostContainer";
+import axios from "axios";
+
+import config from "../config";
+import { WalletContext } from "../App";
 const WithdrawModalWrapper = styled.div`
   position: fixed;
   top: 0;
@@ -140,12 +144,14 @@ function WithdrawModal({
   setDepositIsOpen,
   isLPBalance,
   setIsLPBalance,
-  isPoolBalance,
+  poolBalance,
   setIsPoolBalance,
+  userBalance,
+  lpBalance,
 }) {
+  const { wallet } = useContext(WalletContext);
   const [amount, setAmount] = useState("");
-  const [isTotalLP, setIsTotalLP] = useState("");
-
+  const [myBalance, setMyBalance] = useState(userBalance);
   const ClickedIsOpen = () => {
     setDepositIsOpen(false);
   };
@@ -153,32 +159,10 @@ function WithdrawModal({
   const memoizedHandAmount = useMemo(
     () => (event) => {
       setAmount(event.target.value);
+      setMyBalance(myBalance - event.target.value);
     },
     [amount]
   );
-
-  const getTotalLPBalance = async () => {
-    const client = await ArchwayClient.connect(network.endpoint);
-    const getLPTotalSupply = async () => {
-      try {
-        const getTotalMsg = {
-          total_supply: {},
-        };
-        const totalResult = await client.queryContractSmart(
-          process.env.REACT_APP_LP_CONTRACT_ADDRESS,
-          getTotalMsg
-        );
-
-        setIsTotalLP(totalResult);
-
-        return totalResult;
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    getLPTotalSupply();
-  };
-  getTotalLPBalance();
 
   const withdrawContract = async () => {
     const signer = await SigningCosmWasmClient.connectWithSigner(
@@ -189,13 +173,23 @@ function WithdrawModal({
         prefix: network.prefix,
       }
     );
-
+    // const { amount } = await signer.getBalance(
+    //   wallet.name.bech32Address,
+    //   "uconst"
+    // );
     try {
+      console.log(amount, lpBalance, userBalance);
+      const decimalAmount = Number(amount) * 1000000;
+      const decimalUserBalance = Number(userBalance) * 1000000;
+      console.log((decimalAmount / decimalUserBalance) * lpBalance);
+      console.log("lpBalance", lpBalance);
+      const withdrawLp = (decimalAmount / decimalUserBalance) * lpBalance;
+      console.log(withdrawLp);
       const allowanceMsg = {
         increase_allowance: {
           spender: process.env.REACT_APP_BANK_CONTRACT_ADDRESS,
-          amount: (amount * 1000000).toString(),
-          // not defined. what is this data????????????????????????????????????????????
+          amount: withdrawLp.toString(),
+          // not defined. what is this data???????????????????????????????????????????? 0.892007
           //   expires: {
           //     at_height: expires,
           //   },
@@ -221,7 +215,16 @@ function WithdrawModal({
         "auto",
         undefined
       );
-      // console.log(executeMulti);
+      const balance2 = await signer.getBalance(
+        wallet.name.bech32Address,
+        "uconst"
+      );
+      console.log(amount, balance2.amount);
+      console.log(Number(amount) - Number(balance2.amount));
+      await axios.post(`${config.serverEndpoint}/withdraw`, {
+        address: wallet.name.bech32Address,
+        amount: Number(amount) - Number(balance2.amount),
+      });
       toast.success(`Tx Hash ${transactionHash}`);
     } catch (err) {
       console.log(err);
@@ -232,7 +235,7 @@ function WithdrawModal({
     <WithdrawModalWrapper>
       <WithdrawModalDiv>
         <WithdrawModalTitle>
-          AMG (LP)<button onClick={ClickedIsOpen}>X</button>
+          CONST<button onClick={ClickedIsOpen}>X</button>
         </WithdrawModalTitle>
         <div>
           <WithdrawModalContent>
@@ -248,17 +251,13 @@ function WithdrawModal({
               onChange={memoizedHandAmount}
             ></input>
             <WithdrawModalInputAmount>
-              LP balance: {isLPBalance != null ? isLPBalance / 1000000 : "0"}
+              {/* LP balance: {isLPBalance != null ? isLPBalance / 1000000 : "0"} */}
             </WithdrawModalInputAmount>
           </WithdrawModalInputDiv>
         </WithdrawModalInputTotal>
         <WithdrawModalOutputDiv>
-          <div>receive CONST</div>
-          <div>
-            {amount
-              ? ((amount / isTotalLP) * isPoolBalance * 1000000).toFixed(6)
-              : "0"}
-          </div>
+          <div>Remain Balance</div>
+          <div>{myBalance}</div>
         </WithdrawModalOutputDiv>
         <WithdrawContractDiv>
           <button onClick={withdrawContract}>Withdraw</button>

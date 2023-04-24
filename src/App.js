@@ -33,7 +33,7 @@ function App({ getInfo }) {
   useEffect(() => {
     if (!wallet) {
       const wallet = sessionStorage.getItem("wallet");
-      console.log(wallet);
+
       if (!wallet) {
         setWallet(wallet);
       }
@@ -41,13 +41,11 @@ function App({ getInfo }) {
     const ws = new WebSocket("wss://amg-backend.runeterra.info");
     setSocket(ws);
     // DB WS
-    ws.onopen = () => {
-      console.log("EUR/USD Client Connected");
-    };
+    ws.onopen = () => {};
     ws.onmessage = (message) => {
       const data = JSON.parse(message.data);
       const method = data.method;
-      // console.log("method", method);
+
       switch (method) {
         case "new_pool":
           const pool = data.data;
@@ -59,7 +57,7 @@ function App({ getInfo }) {
           break;
         case "price_update":
           const newPrice = data.data;
-          // console.log("price", newPrice);
+
           setPrice(newPrice);
           break;
         case "betting_update":
@@ -80,11 +78,11 @@ function App({ getInfo }) {
           };
 
           setNewChart(newSetupChart);
-          // console.log("뉴차트셋업", newSetupChart);
+
           break;
         case "init": {
           const { chart, game, pool, price } = data.data;
-          // console.log("", data.data);
+
           setChart(chart);
           setBettingList(game);
           setPool(pool);

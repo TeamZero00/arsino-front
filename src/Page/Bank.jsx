@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { useContext, useState } from "react";
 import styled from "styled-components";
 
-import BalanceContext from "../components/BalanceContext";
 import DepositModal from "../components/DepositModal";
 import Header from "../components/Header";
 import WithdrawModal from "../components/WithdrawModal";
@@ -262,8 +261,11 @@ testnetInfo();
 
 function Bank({ pool }) {
   const [lpBalance, setLpBalance] = useState("0");
+  const [poolBalance, setPoolBalance] = useState("0");
+  const [lpTotalSupply, setLpTotalSupply] = useState("0");
+  const [userBalance, setUserBalance] = useState("Loading..");
   const { wallet, setWallet } = useContext(WalletContext);
-  const [reward, setReward] = useState("0");
+  const [reward, setReward] = useState("Loading..");
   const [clickDeposit, setClickDeposit] = useState(true);
   const [clickWithdraw, setClickWithdraw] = useState(false);
   const [depositIsOpen, setDepositIsOpen] = useState(false);
@@ -295,68 +297,77 @@ function Bank({ pool }) {
     setClickDeposit(false);
     setClickWithdraw(true);
   };
+  const networkInfo = async () => {
+    const gasPrice = GasPrice.fromString("0.01uconst");
+    const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
+    setGasPrice(gasPrice);
+    setOfflineSigner(offlineSigner);
 
-  useEffect(() => {
-    const networkInfo = async () => {
-      const gasPrice = GasPrice.fromString("0.01uconst");
-      const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
-      setGasPrice(gasPrice);
-      setOfflineSigner(offlineSigner);
-
-      const accounts = await offlineSigner.getAccounts();
-      setIsAccount(accounts[0].address);
-      const testClient = await SigningArchwayClient.connectWithSigner(
-        network.endpoint,
-        offlineSigner,
-        {
-          gasPrice,
-          prefix: network.prefix,
-        }
-      );
-      const clientBalance = await testClient.getBalance(
-        accounts[0].address,
-        "uconst"
-      );
-      const lpBalancemsg = {
-        balance: { address: accounts[0].address },
-      };
-      const { balance } = await testClient.queryContractSmart(
-        config.lpContract,
-        lpBalancemsg
-      );
-      if (wallet) {
-        const lpTotalmsg = {
-          total_supply: {},
-        };
-        const lpTotalSupply = await testClient.queryContractSmart(
-          config.lpContract,
-          lpTotalmsg
-        );
-        console.log("lpTotalSupply", lpTotalSupply);
-        const poolmsg = {
-          get_pool: {},
-        };
-        const pool = await testClient.queryContractSmart(
-          config.bankContract,
-          poolmsg
-        );
-        console.log(pool.balance);
-
-        const initBalance = await fetchBalance();
-        console.log(balance, lpTotalSupply, pool.balance);
-        const reward = (
-          ((balance / lpTotalSupply) * pool.balance - initBalance) /
-          1000000
-        ).toFixed(6);
-        setReward(reward);
+    const accounts = await offlineSigner.getAccounts();
+    setIsAccount(accounts[0].address);
+    const testClient = await SigningArchwayClient.connectWithSigner(
+      network.endpoint,
+      offlineSigner,
+      {
+        gasPrice,
+        prefix: network.prefix,
       }
-
-      console.log("reward", reward);
-      // setReward();
-      setLpBalance(balance);
-      isMyBalance(clientBalance.amount / 1000000);
-      setMyAddress(accounts[0].address);
+    );
+    const clientBalance = await testClient.getBalance(
+      accounts[0].address,
+      "uconst"
+    );
+    const lpBalancemsg = {
+      balance: { address: accounts[0].address },
     };
+    const { balance } = await testClient.queryContractSmart(
+      config.lpContract,
+      lpBalancemsg
+    );
+
+    setLpBalance(balance);
+    if (wallet) {
+      const lpTotalmsg = {
+        total_supply: {},
+      };
+
+      const lpTotalSupply = await testClient.queryContractSmart(
+        config.lpContract,
+        lpTotalmsg
+      );
+      setLpTotalSupply(lpTotalSupply);
+      const poolmsg = {
+        get_pool: {},
+      };
+      const pool = await testClient.queryContractSmart(
+        config.bankContract,
+        poolmsg
+      );
+      setPoolBalance(pool.balance);
+      const initBalance = await fetchBalance();
+
+      const reward = (
+        ((balance / lpTotalSupply) * pool.balance - initBalance) /
+        1000000
+      ).toFixed(6);
+      setReward(reward);
+    } else {
+      setReward(0);
+    }
+
+    const userBalance = (
+      ((Number(lpBalance) / Number(lpTotalSupply)) * Number(pool.balance)) /
+      1000000
+    ).toFixed(6);
+
+    console.log(userBalance);
+
+    setUserBalance(userBalance);
+    setLpBalance(balance);
+    isMyBalance(clientBalance.amount / 1000000);
+    setMyAddress(accounts[0].address);
+  };
+  useEffect(() => {
     networkInfo();
   }, []);
   const fetchBalance = async () => {
@@ -369,12 +380,13 @@ function Bank({ pool }) {
       }`
     );
     const initBalance = data.balance;
-    console.log("initBalance", initBalance);
+
+    // console.log("initBalance", initBalance);
     return initBalance;
   };
   useEffect(() => {
-    fetchBalance();
-  }, [wallet]);
+    networkInfo();
+  }, [pool]);
 
   const DepositForm = () => {
     return (
@@ -411,8 +423,8 @@ function Bank({ pool }) {
             setOfflineSigner={setOfflineSigner}
             isAccount={isAccount}
             setIsAccount={setIsAccount}
-            setIsPoolBalance={setIsPoolBalance}
-            isPoolBalance={isPoolBalance}
+            lpBalance={lpBalance}
+            poolBalance={poolBalance}
           />
         )}
       </div>
@@ -433,10 +445,10 @@ function Bank({ pool }) {
         <WithdrawAsset>
           <button onClick={ClickedIsOpen}>
             <WithdrawAssetInner>
-              <div>AMG (LP)</div>
+              <div>CONST</div>
             </WithdrawAssetInner>
             <WithdrawAssetInner>
-              <div>{(Number(lpBalance) / 1000000).toFixed(6)}</div>
+              <div>{userBalance}</div>
             </WithdrawAssetInner>
           </button>
         </WithdrawAsset>
@@ -455,6 +467,8 @@ function Bank({ pool }) {
             setIsAccount={setIsAccount}
             isPoolBalance={isPoolBalance}
             setIsPoolBalance={setIsPoolBalance}
+            userBalance={userBalance}
+            lpBalance={lpBalance}
           />
         )}
       </div>

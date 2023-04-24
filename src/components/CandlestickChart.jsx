@@ -95,7 +95,7 @@ const CandlestickChart = ({ chart, newChart }) => {
 
   const [series, setSeries] = useState([{ data: [] }]);
 
-  const sortWebsocketUrl = "ws://66.42.38.167:8080";
+  const sortWebsocketUrl = "wss://amg-backend.runeterra.info";
   const sortChart = chart.sort((a, b) => {
     return a.id - b.id;
   });
@@ -121,7 +121,7 @@ const CandlestickChart = ({ chart, newChart }) => {
     };
     fetchChartData();
   }, []);
-  console.log("series", series);
+
   const updateXAxisRange = () => {
     const currentTime = Date.now();
     const threeHoursAgo = currentTime - 1 * 60 * 60 * 1000;
@@ -194,11 +194,9 @@ const CandlestickChart = ({ chart, newChart }) => {
     setSeries((prevState) => {
       let data = [...prevState[0].data];
       const lastCandlestick = data[data.length - 1];
-      console.log(lastCandlestick.x, "lastCandlestick");
-      console.log(newChartData.x, "newChartData");
-      if (lastCandlestick.x == newChartData.x) {
+
+      if (lastCandlestick.x === newChartData.x) {
         data[data.length - 1] = newChartData;
-        console.log(newChartData);
       } else {
         data.push(newChartData);
         if (data.length > 600) {

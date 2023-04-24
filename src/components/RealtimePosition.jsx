@@ -84,7 +84,6 @@ const LoadingDiv = styled.div`
 `;
 
 function RealtimePosition({ height, bettingList }) {
-  // console.log(bettingList);
   const currentBettingList = bettingList.filter((betting) => {
     return betting.status === "Pending";
   });

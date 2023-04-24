@@ -113,14 +113,9 @@ const SmartContractButton = ({
       setBalance(updatedClientBalance);
       updateAfterBalance();
 
-      console.log(executeFee);
-      console.log(transactionHash);
-      console.log(height);
-      console.log(logs[0].events[5].attributes);
       setIsLogs(logs);
       setIsTxHash(transactionHash);
-      console.log(updatedClientBalance);
-      console.log("gasPrice:", gasPrice);
+
       toast.success(`Tx Hash ${transactionHash}`);
     } catch (err) {
       console.error(err);
