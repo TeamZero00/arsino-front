@@ -361,8 +361,11 @@ function Bank({ pool }) {
     ).toFixed(6);
 
     console.log(userBalance);
-
-    setUserBalance(userBalance);
+    if (!userBalance) {
+      setUserBalance(0);
+    } else {
+      setUserBalance(userBalance);
+    }
     setLpBalance(balance);
     isMyBalance(clientBalance.amount / 1000000);
     setMyAddress(accounts[0].address);
