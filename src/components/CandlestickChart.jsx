@@ -112,9 +112,7 @@ const CandlestickChart = ({ chart, newChart }) => {
 
       const currentTime = Date.now();
       const threeHoursAgo = currentTime - 3 * 60 * 60 * 1000;
-      const filteredData = data.filter(
-        (candlestick) => candlestick.x >= threeHoursAgo
-      );
+      const filteredData = data.filter((candlestick) => candlestick.x >= threeHoursAgo);
       updateYAxisRange(filteredData);
       setSeries([{ data: filteredData }]);
       // console.log(data2, "data2");
@@ -124,7 +122,7 @@ const CandlestickChart = ({ chart, newChart }) => {
 
   const updateXAxisRange = () => {
     const currentTime = Date.now();
-    const threeHoursAgo = currentTime - 1 * 60 * 60 * 1000;
+    const threeHoursAgo = currentTime - 3 * 60 * 60 * 1000;
 
     setOptions((prevOptions) => ({
       ...prevOptions,

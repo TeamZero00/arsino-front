@@ -252,10 +252,7 @@ async function testnetInfo() {
       prefix: "archway",
     }
   );
-  const clientBalance = await testClient.getBalance(
-    accounts[0].address,
-    "uconst"
-  );
+  const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
 }
 testnetInfo();
 
@@ -297,7 +294,7 @@ function Bank({ pool }) {
     setClickDeposit(false);
     setClickWithdraw(true);
   };
-  const networkInfo = async () => {
+  const networkInfoFn = async () => {
     const gasPrice = GasPrice.fromString("0.01uconst");
     const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
     setGasPrice(gasPrice);
@@ -305,25 +302,15 @@ function Bank({ pool }) {
 
     const accounts = await offlineSigner.getAccounts();
     setIsAccount(accounts[0].address);
-    const testClient = await SigningArchwayClient.connectWithSigner(
-      network.endpoint,
-      offlineSigner,
-      {
-        gasPrice,
-        prefix: network.prefix,
-      }
-    );
-    const clientBalance = await testClient.getBalance(
-      accounts[0].address,
-      "uconst"
-    );
+    const testClient = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
+      gasPrice,
+      prefix: network.prefix,
+    });
+    const clientBalance = await testClient.getBalance(accounts[0].address, "uconst");
     const lpBalancemsg = {
       balance: { address: accounts[0].address },
     };
-    const { balance } = await testClient.queryContractSmart(
-      config.lpContract,
-      lpBalancemsg
-    );
+    const { balance } = await testClient.queryContractSmart(config.lpContract, lpBalancemsg);
 
     setLpBalance(balance);
     if (wallet) {
@@ -331,34 +318,22 @@ function Bank({ pool }) {
         total_supply: {},
       };
 
-      const lpTotalSupply = await testClient.queryContractSmart(
-        config.lpContract,
-        lpTotalmsg
-      );
+      const lpTotalSupply = await testClient.queryContractSmart(config.lpContract, lpTotalmsg);
       setLpTotalSupply(lpTotalSupply);
       const poolmsg = {
         get_pool: {},
       };
-      const pool = await testClient.queryContractSmart(
-        config.bankContract,
-        poolmsg
-      );
+      const pool = await testClient.queryContractSmart(config.bankContract, poolmsg);
       setPoolBalance(pool.balance);
       const initBalance = await fetchBalance();
 
-      const reward = (
-        ((balance / lpTotalSupply) * pool.balance - initBalance) /
-        1000000
-      ).toFixed(6);
+      const reward = (((balance / lpTotalSupply) * pool.balance - initBalance) / 1000000).toFixed(6);
       setReward(reward);
     } else {
       setReward(0);
     }
 
-    const userBalance = (
-      ((Number(lpBalance) / Number(lpTotalSupply)) * Number(pool.balance)) /
-      1000000
-    ).toFixed(6);
+    const userBalance = (((Number(lpBalance) / Number(lpTotalSupply)) * Number(pool.balance)) / 1000000).toFixed(6);
 
     console.log(userBalance);
 
@@ -368,16 +343,14 @@ function Bank({ pool }) {
     setMyAddress(accounts[0].address);
   };
   useEffect(() => {
-    networkInfo();
+    networkInfoFn();
   }, []);
   const fetchBalance = async () => {
     if (!wallet) {
       return 0;
     }
     const { data } = await axios.get(
-      `${config.serverEndpoint}/balance/${
-        wallet ? wallet.name.bech32Address : "arhcway1"
-      }`
+      `${config.serverEndpoint}/balance/${wallet ? wallet.name.bech32Address : "arhcway1"}`
     );
     const initBalance = data.balance;
 
@@ -385,7 +358,7 @@ function Bank({ pool }) {
     return initBalance;
   };
   useEffect(() => {
-    networkInfo();
+    networkInfoFn();
   }, [pool]);
 
   const DepositForm = () => {
@@ -490,15 +463,11 @@ function Bank({ pool }) {
         <BankTotalPool>
           <BankTotalPoolDiv>
             <BankTotalPoolInner>Total Pool Balance (CONST)</BankTotalPoolInner>
-            <BankTotalPoolData>
-              {(Number(pool.balance) / 1000000).toFixed(6)}
-            </BankTotalPoolData>
+            <BankTotalPoolData>{(Number(pool.balance) / 1000000).toFixed(6)}</BankTotalPoolData>
           </BankTotalPoolDiv>
           <BankTotalPoolDiv>
             <BankTotalPoolInner>Balance in Play</BankTotalPoolInner>
-            <BankTotalPoolData>
-              {(Number(pool.nowGame) / 1000000).toFixed(6)}
-            </BankTotalPoolData>
+            <BankTotalPoolData>{(Number(pool.nowGame) / 1000000).toFixed(6)}</BankTotalPoolData>
           </BankTotalPoolDiv>
         </BankTotalPool>
         {wallet ? (
@@ -525,16 +494,12 @@ function Bank({ pool }) {
                 Withdraw
               </button>
             </BankWrapperSupply>
-            <DepositDiv>
-              {clickDeposit ? <DepositForm /> : <WithdrawForm />}
-            </DepositDiv>
+            <DepositDiv>{clickDeposit ? <DepositForm /> : <WithdrawForm />}</DepositDiv>
           </>
         ) : (
           <WalletConnect
             onClick={async () => {
-              const { name, signer, balance } = await connectWallet(
-                networkInfo
-              );
+              const { name, signer, balance } = await connectWallet(networkInfo);
 
               setWallet({
                 name,

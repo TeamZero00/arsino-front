@@ -32,6 +32,11 @@ const networkInfo = {
     bech32PrefixConsAddr: "archway" + "valcons",
     bech32PrefixConsPub: "archway" + "valconspub",
   },
+  gasPriceStep: {
+    low: 0.01,
+    average: 0.025,
+    high: 0.04,
+  },
   // 체인에서 사용되는 모든 코인/토큰의 리스트
   currencies: [
     {
