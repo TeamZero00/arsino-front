@@ -356,13 +356,13 @@ function Bank({ pool }) {
 
       setPoolBalance(pool.balance);
       const initBalance = ((await fetchBalance()) / 1000000).toFixed(6);
-      console.log("init Balance", initBalance);
+
       const reward = (
         ((balance / lpTotalSupply) * pool.balance) /
         1000000
       ).toFixed(6);
-      console.log(reward);
-      setReward(reward - initBalance);
+
+      setReward((reward - initBalance).toFixed(6));
     } else {
       setReward(0);
     }
