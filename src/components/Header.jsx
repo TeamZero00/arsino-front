@@ -336,7 +336,7 @@ function Header() {
             }}
             onClick={BankLinkClicked}
           >
-            Bank
+            Pool
           </Link>
         </LeftHeaderLink>
       </LeftHeaderNavi>

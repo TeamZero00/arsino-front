@@ -134,14 +134,7 @@ const DepositContractDiv = styled.div`
 `;
 
 function DepositModal(props) {
-  const {
-    myBalance,
-    setDepositIsOpen,
-    network,
-    gasPrice,
-    offlineSigner,
-    isAccount,
-  } = props;
+  const { myBalance, setDepositIsOpen, network, gasPrice, offlineSigner, isAccount } = props;
 
   const [amount, setAmount] = useState("");
   const [isReceiveLP, setIsReceiveLP] = useState("0");
@@ -168,14 +161,8 @@ function DepositModal(props) {
           get_pool: {},
         };
         const bankContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
-        const totalSupply = await client.queryContractSmart(
-          process.env.REACT_APP_LP_CONTRACT_ADDRESS,
-          getTotalMsg
-        );
-        const { balance } = await client.queryContractSmart(
-          bankContract,
-          getPoolMsg
-        );
+        const totalSupply = await client.queryContractSmart(process.env.REACT_APP_LP_CONTRACT_ADDRESS, getTotalMsg);
+        const { balance } = await client.queryContractSmart(bankContract, getPoolMsg);
         setIsReceiveLP(balance);
         isGetTotalLp(totalSupply);
       } catch (err) {
@@ -187,14 +174,10 @@ function DepositModal(props) {
   getReceiveLp();
 
   const depositContract = async () => {
-    const signer = await SigningArchwayClient.connectWithSigner(
-      network.endpoint,
-      offlineSigner,
-      {
-        gasPrice,
-        prefix: network.prefix,
-      }
-    );
+    const signer = await SigningArchwayClient.connectWithSigner(network.endpoint, offlineSigner, {
+      gasPrice,
+      prefix: network.prefix,
+    });
     const executeContract = process.env.REACT_APP_BANK_CONTRACT_ADDRESS;
     try {
       const msg = {
@@ -250,23 +233,13 @@ function DepositModal(props) {
         </div>
         <DepositModalInputTotal>
           <DepositModalInputDiv>
-            <input
-              type="number"
-              placeholder="0.0"
-              value={amount}
-              onChange={memoizedHandAmount}
-            />
-            <DepositModalInputAmount>
-              balance: {wallet ? wallet.balance.amount : "0"}
-            </DepositModalInputAmount>
+            <input type="number" placeholder="0.0" value={amount} onChange={memoizedHandAmount} />
+            <DepositModalInputAmount>balance: {wallet ? wallet.balance.amount / 1000000 : "0"}</DepositModalInputAmount>
           </DepositModalInputDiv>
         </DepositModalInputTotal>
         <DepositModalOutputDiv>
           <div>receive LP</div>
-          <div>
-            {amount ? ((amount / isReceiveLP) * getTotalLP).toFixed(6) : "0"}{" "}
-            Token
-          </div>
+          <div>{amount ? ((amount / isReceiveLP) * getTotalLP).toFixed(6) : "0"} Token</div>
         </DepositModalOutputDiv>
         <DepositContractDiv>
           <button onClick={depositContract}>Deposit</button>
