@@ -220,7 +220,7 @@ function DepositModal(props) {
 
       toast.success(`Tx Hash ${transactionHash}`);
 
-      const respose = await axios.post(`${config.serverEndpoint}/deposit`, {
+      await axios.post(`${config.serverEndpoint}/deposit`, {
         address: wallet.name.bech32Address,
         amount: (amount * 1000000).toString(),
       });

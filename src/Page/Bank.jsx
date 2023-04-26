@@ -260,20 +260,17 @@ async function testnetInfo() {
 testnetInfo();
 
 function Bank({ pool }) {
+  const { wallet, setWallet } = useContext(WalletContext);
   const [lpBalance, setLpBalance] = useState("0");
   const [poolBalance, setPoolBalance] = useState("0");
   const [lpTotalSupply, setLpTotalSupply] = useState("0");
   const [userBalance, setUserBalance] = useState("Loading..");
-  const { wallet, setWallet } = useContext(WalletContext);
   const [reward, setReward] = useState("Loading..");
   const [clickDeposit, setClickDeposit] = useState(true);
   const [clickWithdraw, setClickWithdraw] = useState(false);
   const [depositIsOpen, setDepositIsOpen] = useState(false);
   const [isPoolBalance, setIsPoolBalance] = useState("");
   const [myBalance, isMyBalance] = useState("");
-  const [myAddress, setMyAddress] = useState("");
-  // const [isLPBalance, setIsLPBalance] = useState("");
-  const [handleInputAmount, setHandleInputAmount] = useState("");
 
   const [gasPrice, setGasPrice] = useState(null);
   const [offlineSigner, setOfflineSigner] = useState(null);
@@ -297,6 +294,22 @@ function Bank({ pool }) {
     setClickDeposit(false);
     setClickWithdraw(true);
   };
+
+  const fetchBalance = async () => {
+    if (!wallet) {
+      return 0;
+    }
+    const { data } = await axios.get(
+      `${config.serverEndpoint}/balance/${
+        wallet ? wallet.name.bech32Address : "arhcway1"
+      }`
+    );
+    const initBalance = data.balance;
+    console.log("initBalance", initBalance);
+    // console.log("initBalance", initBalance);
+    return initBalance;
+  };
+
   const networkInfo = async () => {
     const gasPrice = GasPrice.fromString("0.01uconst");
     const offlineSigner = window.getOfflineSigner(network.chainId, gasPrice);
@@ -313,10 +326,7 @@ function Bank({ pool }) {
         prefix: network.prefix,
       }
     );
-    const clientBalance = await testClient.getBalance(
-      accounts[0].address,
-      "uconst"
-    );
+
     const lpBalancemsg = {
       balance: { address: accounts[0].address },
     };
@@ -324,33 +334,35 @@ function Bank({ pool }) {
       config.lpContract,
       lpBalancemsg
     );
+    const lpTotalmsg = {
+      total_supply: {},
+    };
 
+    const lpTotalSupply = await testClient.queryContractSmart(
+      config.lpContract,
+      lpTotalmsg
+    );
+    setLpTotalSupply(lpTotalSupply);
     setLpBalance(balance);
     if (wallet) {
-      const lpTotalmsg = {
-        total_supply: {},
-      };
-
-      const lpTotalSupply = await testClient.queryContractSmart(
-        config.lpContract,
-        lpTotalmsg
-      );
-      setLpTotalSupply(lpTotalSupply);
       const poolmsg = {
         get_pool: {},
       };
+
       const pool = await testClient.queryContractSmart(
         config.bankContract,
         poolmsg
       );
-      setPoolBalance(pool.balance);
-      const initBalance = await fetchBalance();
 
+      setPoolBalance(pool.balance);
+      const initBalance = ((await fetchBalance()) / 1000000).toFixed(6);
+      console.log("init Balance", initBalance);
       const reward = (
-        ((balance / lpTotalSupply) * pool.balance - initBalance) /
+        ((balance / lpTotalSupply) * pool.balance) /
         1000000
       ).toFixed(6);
-      setReward(reward);
+      console.log(reward);
+      setReward(reward - initBalance);
     } else {
       setReward(0);
     }
@@ -358,38 +370,27 @@ function Bank({ pool }) {
     const userBalance = (
       ((Number(lpBalance) / Number(lpTotalSupply)) * Number(pool.balance)) /
       1000000
-    ).toFixed(6);
+    )
+      .toFixed(6)
+      .toString();
+    if (!lpBalance || !lpTotalSupply || !pool.balance) {
+      setUserBalance(0);
+      return;
+    }
 
-    console.log(userBalance);
     if (!userBalance) {
       setUserBalance(0);
     } else {
       setUserBalance(userBalance);
     }
-    setLpBalance(balance);
-    isMyBalance(clientBalance.amount / 1000000);
-    setMyAddress(accounts[0].address);
   };
-  useEffect(() => {
-    networkInfo();
-  }, []);
-  const fetchBalance = async () => {
-    if (!wallet) {
-      return 0;
-    }
-    const { data } = await axios.get(
-      `${config.serverEndpoint}/balance/${
-        wallet ? wallet.name.bech32Address : "arhcway1"
-      }`
-    );
-    const initBalance = data.balance;
+  // useEffect(() => {
+  //   networkInfo();
+  // }, []);
 
-    // console.log("initBalance", initBalance);
-    return initBalance;
-  };
   useEffect(() => {
     networkInfo();
-  }, [pool]);
+  }, [pool, wallet]);
 
   const DepositForm = () => {
     return (
